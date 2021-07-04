@@ -2,14 +2,12 @@ package com.jz.logger.core.aspect;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.jz.logger.core.LoggerInfo;
-import com.jz.logger.core.TraceInfo;
 import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.enumerate.Strategy;
 import com.jz.logger.core.event.LoggerEventProvider;
 import com.jz.logger.core.handler.DefaultLoggerTraceHandler;
 import com.jz.logger.core.handler.LoggerTraceHandler;
 import com.jz.logger.core.holder.LoggerHolder;
-import com.jz.logger.core.util.ClassUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -28,7 +26,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -91,9 +88,8 @@ public class LoggerAspect implements BeanFactoryAware {
 
     private void loggerHandle(Object oldObject, Object newObject, Logger logger) {
         LoggerTraceHandler loggerTraceHandler = getLoggerTraceHandler(logger.handlerBeanName());
-        List<TraceInfo> traceInfos = ClassUtils.getTraceInfo(oldObject.getClass());
         Strategy strategy = logger.strategy();
-        LoggerInfo loggerInfo = new LoggerInfo(oldObject, newObject, logger.topic(), traceInfos);
+        LoggerInfo loggerInfo = new LoggerInfo(oldObject, newObject, logger);
         if (Strategy.SYNC == strategy) {
             loggerTraceHandler.execute(loggerInfo);
         } else if (Strategy.ASYN_SERIAL == strategy) {

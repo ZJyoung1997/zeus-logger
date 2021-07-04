@@ -1,6 +1,6 @@
 package com.jz.logger.core.util;
 
-import com.jz.logger.core.TraceInfo;
+import com.jz.logger.core.FieldInfo;
 import com.jz.logger.core.annotation.Trace;
 import lombok.experimental.UtilityClass;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -11,26 +11,25 @@ import java.util.*;
 @UtilityClass
 public class ClassUtils {
 
-    private static final Map<Class<?>, List<TraceInfo>> traceInfoCache = new ConcurrentReferenceHashMap<>();
+    private static final Map<Class<?>, List<FieldInfo>> fieldInfoCache = new ConcurrentReferenceHashMap<>();
 
-    public List<TraceInfo> getTraceInfo(Class<?> clazz) {
-        List<TraceInfo> traceInfos = traceInfoCache.get(clazz);
-        if (traceInfos == null) {
-            synchronized (traceInfoCache) {
-                traceInfos = traceInfoCache.get(clazz);
-                if (traceInfos == null) {
-                    traceInfos = traceInfoCache.computeIfAbsent(clazz, e -> new ArrayList<>());
+    public List<FieldInfo> getTraceFieldInfos(Class<?> clazz) {
+        List<FieldInfo> classTraces = fieldInfoCache.get(clazz);
+        if (classTraces == null) {
+            synchronized (fieldInfoCache) {
+                classTraces = fieldInfoCache.get(clazz);
+                if (classTraces == null) {
+                    classTraces = fieldInfoCache.computeIfAbsent(clazz, e -> new ArrayList<>());
                     for (Field field : clazz.getDeclaredFields()) {
                         Trace trace = field.getAnnotation(Trace.class);
                         if (trace != null) {
-                            traceInfos.add(TraceInfo.build(trace, field.getName()));
+                            classTraces.add(new FieldInfo(trace, field));
                         }
                     }
-                    traceInfos.sort(Comparator.comparingInt(TraceInfo::getOrder));
                 }
             }
         }
-        return Collections.unmodifiableList(traceInfos);
+        return Collections.unmodifiableList(classTraces);
     }
 
 }
