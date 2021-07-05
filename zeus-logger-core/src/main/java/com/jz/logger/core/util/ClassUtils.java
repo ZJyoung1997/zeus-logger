@@ -6,7 +6,10 @@ import lombok.experimental.UtilityClass;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @UtilityClass
 public class ClassUtils {
@@ -19,12 +22,17 @@ public class ClassUtils {
             synchronized (fieldInfoCache) {
                 classTraces = fieldInfoCache.get(clazz);
                 if (classTraces == null) {
-                    classTraces = fieldInfoCache.computeIfAbsent(clazz, e -> new ArrayList<>());
+                    classTraces = new ArrayList<>();
                     for (Field field : clazz.getDeclaredFields()) {
                         Trace trace = field.getAnnotation(Trace.class);
                         if (trace != null) {
                             classTraces.add(new FieldInfo(trace, field));
                         }
+                    }
+                    if (classTraces.isEmpty()) {
+                        fieldInfoCache.put(clazz, Collections.emptyList());
+                    } else {
+                        fieldInfoCache.put(clazz, classTraces);
                     }
                 }
             }
