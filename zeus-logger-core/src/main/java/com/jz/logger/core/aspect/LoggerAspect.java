@@ -5,7 +5,6 @@ import com.jz.logger.core.LoggerInfo;
 import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.enumerate.Strategy;
 import com.jz.logger.core.event.LoggerEventProvider;
-import com.jz.logger.core.handler.DefaultLoggerTraceHandler;
 import com.jz.logger.core.handler.LoggerTraceHandler;
 import com.jz.logger.core.holder.LoggerHolder;
 import lombok.SneakyThrows;
@@ -33,6 +32,8 @@ import java.util.Map;
 @Component
 public class LoggerAspect implements BeanFactoryAware {
 
+    private static final String DEFAULT_LOGGER_TRACE_HANDLER_BEAN_NAME = "defaultLoggerTraceHandler";
+
     private final ExpressionParser PARSER = new SpelExpressionParser();
 
     private final StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
@@ -51,7 +52,7 @@ public class LoggerAspect implements BeanFactoryAware {
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
         this.evaluationContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
-        loggerTraceHandlerCache.put("defaultLoggerTraceHandler", beanFactory.getBean(DefaultLoggerTraceHandler.class));
+        loggerTraceHandlerCache.put(DEFAULT_LOGGER_TRACE_HANDLER_BEAN_NAME, beanFactory.getBean(DEFAULT_LOGGER_TRACE_HANDLER_BEAN_NAME, LoggerTraceHandler.class));
     }
 
     @SneakyThrows

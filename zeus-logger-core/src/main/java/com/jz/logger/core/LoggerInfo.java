@@ -60,16 +60,13 @@ public class LoggerInfo {
         traceInfo.setTag(trace.tag());
         traceInfo.setOrder(trace.order());
         traceInfo.setFieldName(field.getName());
-        Object oldValue;
-        Object newValue;
-        if (CharSequenceUtil.isBlank(trace.targetValue())) {
-            field.setAccessible(true);
-            oldValue = field.get(oldObject);
-            newValue = field.get(newObject);
-        } else {
+        field.setAccessible(true);
+        Object oldValue = field.get(oldObject);
+        Object newValue= field.get(newObject);
+        if (CharSequenceUtil.isNotBlank(trace.targetValue())) {
             ExpressionParser parser = new SpelExpressionParser();
-            oldValue = parser.parseExpression(trace.targetValue()).getValue(oldObject);
-            newValue = parser.parseExpression(trace.targetValue()).getValue(newObject);
+            oldValue = parser.parseExpression(trace.targetValue()).getValue(oldValue);
+            newValue = parser.parseExpression(trace.targetValue()).getValue(newValue);
         }
         traceInfo.setOldValue(oldValue);
         traceInfo.setNewValue(newValue);

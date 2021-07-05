@@ -11,6 +11,7 @@ import com.lmax.disruptor.EventFactory;
 import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,7 @@ public class LoggerConfiguration {
     private LoggerProperties loggerProperties;
 
     @Bean
+    @ConditionalOnMissingBean(name = "defaultLoggerTraceHandler")
     public LoggerTraceHandler defaultLoggerTraceHandler() {
         return new DefaultLoggerTraceHandler();
     }
