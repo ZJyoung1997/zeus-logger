@@ -73,4 +73,12 @@ public class LoggerInfo {
         return traceInfo;
     }
 
+    private boolean isEqual(Object oldObject, Object newObject) {
+        if (oldObject == newObject) {
+            return true;
+        } else if (oldObject == null && newObject != null) {
+            return false;
+        }
+    }
+
 }
