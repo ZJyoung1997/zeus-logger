@@ -64,8 +64,8 @@ public class LoggerAspect implements BeanFactoryAware {
         Logger logger = method.getAnnotation(Logger.class);
 
         Object methodResult;
-        Object oldObject = null;
-        Object newObject = null;
+        Object oldObject;
+        Object newObject;
         if (CharSequenceUtil.isNotBlank(logger.selectMethod())) {
             Object selectParam = getSelectParam(logger, joinPoint.getArgs());
             oldObject = PARSER.parseExpression(logger.selectMethod())
