@@ -11,10 +11,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
@@ -42,11 +39,16 @@ public class LoggerInfo {
 
     public List<TraceInfo> getTraceInfos() {
         if (traceInfos == null) {
-            List<FieldInfo> fieldInfos = ClassUtils.getTraceFieldInfos(oldObject.getClass());
-            traceInfos = fieldInfos.stream()
-                    .map(this::buildTraceInfo)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+            Class<?> clazz = oldObject != null ? oldObject.getClass() :
+                    (newObject != null ? newObject.getClass() : null);
+            if (clazz == null) {
+                traceInfos = Collections.emptyList();
+            } else {
+                traceInfos = ClassUtils.getTraceFieldInfos(clazz).stream()
+                        .map(this::buildTraceInfo)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+            }
         }
         return traceInfos;
     }
@@ -59,8 +61,8 @@ public class LoggerInfo {
         }
         Field field = fieldInfo.getField();
         field.setAccessible(true);
-        Object oldValue = field.get(oldObject);
-        Object newValue= field.get(newObject);
+        Object oldValue = oldObject == null ? null : field.get(oldObject);
+        Object newValue= newObject == null ? null : field.get(newObject);
         if (CharSequenceUtil.isNotBlank(trace.targetValue())) {
             ExpressionParser parser = new SpelExpressionParser();
             oldValue = parser.parseExpression(trace.targetValue()).getValue(oldValue);
