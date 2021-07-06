@@ -27,7 +27,7 @@ public class LoggerInfo {
     private Map<String, Object> extDataMap;
 
     @Getter(AccessLevel.NONE)
-    private List<TraceInfo> traceInfos;
+    private List<List<TraceInfo>> multipleTraceInfos;
 
     @Setter
     private Date createTime;
@@ -40,20 +40,28 @@ public class LoggerInfo {
         this.createTime = new Date();
     }
 
-    public List<TraceInfo> getTraceInfos() {
-        if (traceInfos == null) {
-            Class<?> clazz = oldObject != null ? oldObject.getClass() :
-                    (newObject != null ? newObject.getClass() : null);
-            if (clazz == null) {
-                traceInfos = Collections.emptyList();
-            } else {
-                traceInfos = ClassUtils.getTraceFieldInfos(clazz).stream()
-                        .map(this::buildTraceInfo)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
-            }
+    public List<List<TraceInfo>> getTraceInfos() {
+        if (multipleTraceInfos != null) {
+            return multipleTraceInfos;
+        } else if (oldObject == null && newObject == null) {
+            multipleTraceInfos = Collections.emptyList();
+            return multipleTraceInfos;
+        } else if (oldObject instanceof Collection || newObject instanceof Collection) {
+            Collection<?> oldCollection = (Collection) oldObject;
+            Collection<?> newCollection = (Collection) newObject;
+            oldCollection.
         }
-        return traceInfos;
+        Class<?> clazz = oldObject != null ? oldObject.getClass() :
+                (newObject != null ? newObject.getClass() : null);
+        if (clazz == null) {
+            multipleTraceInfos = Collections.emptyList();
+        } else if () {
+            traceInfos = ClassUtils.getTraceFieldInfos(clazz).stream()
+                    .map(this::buildTraceInfo)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+        return multipleTraceInfos;
     }
 
     @SneakyThrows
