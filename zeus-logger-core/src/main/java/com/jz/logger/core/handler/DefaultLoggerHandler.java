@@ -72,7 +72,7 @@ public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
      */
     private Map<String, Object> getExtData(Object oldObject, Logger logger) {
         List<LoggerExtensionData> extensionDataList = new ArrayList<>();
-        if (!logger.disableGlobalExtData()) {
+        if (!logger.disableGlobalExtData() && globalExtDatas != null) {
             extensionDataList.addAll(globalExtDatas);
         }
         Class<?>[] customExtDatas = logger.customExtData();
