@@ -1,0 +1,5 @@
+zeus:
+  logger:
+    concurrentNum: 4
+    concurrentRingBufferSize: 1024
+    serialRingBufferSize: 1024

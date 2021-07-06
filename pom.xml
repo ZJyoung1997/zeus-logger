@@ -14,6 +14,7 @@
         <module>zeus-logger-core</module>
         <module>zeus-logger-spring-boot-autoconfig</module>
         <module>zeus-logger-spring-boot-starter</module>
+        <module>demo</module>
     </modules>
 
     <properties>
@@ -23,15 +24,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
-
         </dependency>
     </dependencies>
 
