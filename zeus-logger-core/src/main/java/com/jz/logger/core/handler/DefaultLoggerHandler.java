@@ -6,6 +6,7 @@ import com.jz.logger.core.LoggerInfo;
 import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.enumerate.Strategy;
 import com.jz.logger.core.event.LoggerEventProvider;
+import com.jz.logger.core.util.ClassUtils;
 import lombok.Setter;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -71,12 +72,13 @@ public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
      */
     private Map<String, Object> getExtData(Object oldObject, Logger logger) {
         List<LoggerExtensionData> extensionDataList = new ArrayList<>();
-        if (logger.disableGlobalExtData()) {
+        if (!logger.disableGlobalExtData()) {
             extensionDataList.addAll(globalExtDatas);
         }
         Class<?>[] customExtDatas = logger.customExtData();
         if (ArrayUtil.isNotEmpty(customExtDatas)) {
             extensionDataList.addAll(Arrays.stream(customExtDatas)
+                    .filter(extClazz -> ClassUtils.hasInterface(extClazz, LoggerExtensionData.class))
                     .map(extClazz -> (LoggerExtensionData) beanFactory.getBean(extClazz))
                     .collect(Collectors.toList()));
         }
