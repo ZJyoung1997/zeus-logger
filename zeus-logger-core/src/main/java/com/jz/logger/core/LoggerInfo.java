@@ -1,5 +1,6 @@
 package com.jz.logger.core;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ArrayUtil;
 import com.jz.logger.core.annotation.Logger;
@@ -10,10 +11,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.lang.reflect.Field;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
@@ -44,11 +42,16 @@ public class LoggerInfo {
 
     public List<TraceInfo> getTraceInfos() {
         if (traceInfos == null) {
-            List<FieldInfo> fieldInfos = ClassUtils.getTraceFieldInfos(oldObject.getClass());
-            traceInfos = fieldInfos.stream()
-                    .map(this::buildTraceInfo)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+            Class<?> clazz = oldObject != null ? oldObject.getClass() :
+                    (newObject != null ? newObject.getClass() : null);
+            if (clazz == null) {
+                traceInfos = Collections.emptyList();
+            } else {
+                traceInfos = ClassUtils.getTraceFieldInfos(clazz).stream()
+                        .map(this::buildTraceInfo)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+            }
         }
         return traceInfos;
     }
@@ -60,29 +63,40 @@ public class LoggerInfo {
             return null;
         }
         Field field = fieldInfo.getField();
-        TraceInfo traceInfo = new TraceInfo();
-        traceInfo.setTag(trace.tag());
-        traceInfo.setOrder(trace.order());
-        traceInfo.setFieldName(field.getName());
         field.setAccessible(true);
-        Object oldValue = field.get(oldObject);
-        Object newValue= field.get(newObject);
+        Object oldValue = oldObject == null ? null : field.get(oldObject);
+        Object newValue= newObject == null ? null : field.get(newObject);
         if (CharSequenceUtil.isNotBlank(trace.targetValue())) {
             ExpressionParser parser = new SpelExpressionParser();
             oldValue = parser.parseExpression(trace.targetValue()).getValue(oldValue);
             newValue = parser.parseExpression(trace.targetValue()).getValue(newValue);
         }
+        if (isEqual(oldObject, newObject)) {
+            return null;
+        }
+        TraceInfo traceInfo = new TraceInfo();
         traceInfo.setOldValue(oldValue);
         traceInfo.setNewValue(newValue);
+        traceInfo.setTag(trace.tag());
+        traceInfo.setOrder(trace.order());
+        traceInfo.setFieldName(field.getName());
         return traceInfo;
     }
 
     private boolean isEqual(Object oldObject, Object newObject) {
-        if (oldObject == newObject) {
+        if (oldObject != null && oldObject.equals(newObject)) {
             return true;
-        } else if (oldObject == null && newObject != null) {
-            return false;
+        } else if (newObject != null && newObject.equals(oldObject)) {
+            return true;
+        } else if (oldObject instanceof Collection && newObject instanceof Collection) {
+            Collection oldCollection = (Collection) oldObject;
+            Collection newCollection = (Collection) newObject;
+            if (oldCollection.size() == newCollection.size() &&
+                    CollUtil.containsAll(oldCollection, newCollection)) {
+                return true;
+            }
         }
+        return false;
     }
 
 }
