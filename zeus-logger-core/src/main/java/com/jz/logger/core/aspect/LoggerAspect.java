@@ -1,11 +1,8 @@
 package com.jz.logger.core.aspect;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.jz.logger.core.LoggerInfo;
 import com.jz.logger.core.annotation.Logger;
-import com.jz.logger.core.enumerate.Strategy;
-import com.jz.logger.core.event.LoggerEventProvider;
-import com.jz.logger.core.handler.LoggerTraceHandler;
+import com.jz.logger.core.handler.LoggerHandler;
 import com.jz.logger.core.holder.LoggerHolder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -22,37 +19,30 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.lang.reflect.Method;
-import java.util.Map;
 
 @Slf4j
 @Aspect
 @Component
 public class LoggerAspect implements BeanFactoryAware {
 
-    private static final String DEFAULT_LOGGER_TRACE_HANDLER_BEAN_NAME = "defaultLoggerTraceHandler";
-
     private final ExpressionParser PARSER = new SpelExpressionParser();
 
     private final StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
 
-    private final Map<String, LoggerTraceHandler> loggerTraceHandlerCache = new ConcurrentReferenceHashMap<>();
+    private final LoggerHandler loggerHandler;
 
     private BeanFactory beanFactory;
 
-    private final LoggerEventProvider loggerEventProvider;
-
-    public LoggerAspect(LoggerEventProvider loggerEventProvider) {
-        this.loggerEventProvider = loggerEventProvider;
+    public LoggerAspect(LoggerHandler loggerHandler) {
+        this.loggerHandler = loggerHandler;
     }
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
         this.evaluationContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
-        loggerTraceHandlerCache.put(DEFAULT_LOGGER_TRACE_HANDLER_BEAN_NAME, beanFactory.getBean(DEFAULT_LOGGER_TRACE_HANDLER_BEAN_NAME, LoggerTraceHandler.class));
     }
 
     @SneakyThrows
@@ -82,31 +72,8 @@ public class LoggerAspect implements BeanFactoryAware {
                 throw new RuntimeException("无法记录日志");
             }
         }
-
-        loggerHandle(oldObject, newObject, logger);
+        loggerHandler.handleLogger(oldObject, newObject, logger);
         return methodResult;
-    }
-
-    private void loggerHandle(Object oldObject, Object newObject, Logger logger) {
-        LoggerTraceHandler loggerTraceHandler = getLoggerTraceHandler(logger.handlerBeanName());
-        Strategy strategy = logger.strategy();
-        LoggerInfo loggerInfo = new LoggerInfo(oldObject, newObject, logger);
-        if (Strategy.SYNC == strategy) {
-            loggerTraceHandler.execute(loggerInfo);
-        } else if (Strategy.ASYN_SERIAL == strategy) {
-            loggerEventProvider.publishWithSerial(loggerInfo, loggerTraceHandler);
-        } else if (Strategy.ASYN_CONCURRENT == strategy) {
-            loggerEventProvider.publishWithConcurrent(loggerInfo, loggerTraceHandler);
-        }
-    }
-
-    public LoggerTraceHandler getLoggerTraceHandler(String loggerHandlerBeanName) {
-        LoggerTraceHandler loggerTraceHandler = loggerTraceHandlerCache.get(loggerHandlerBeanName);
-        if (loggerTraceHandler == null) {
-            loggerTraceHandler = beanFactory.getBean(loggerHandlerBeanName, LoggerTraceHandler.class);
-            loggerTraceHandlerCache.put(loggerHandlerBeanName, loggerTraceHandler);
-        }
-        return loggerTraceHandler;
     }
 
     private Object getSelectParam(Logger logger, Object[] args) {

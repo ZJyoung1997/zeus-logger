@@ -12,6 +12,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -19,11 +20,13 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class LoggerInfo {
 
+    private Logger logger;
+
     private Object oldObject;
 
     private Object newObject;
 
-    private Logger logger;
+    private Map<String, Object> extDataMap;
 
     @Getter(AccessLevel.NONE)
     private List<TraceInfo> traceInfos;
@@ -31,9 +34,10 @@ public class LoggerInfo {
     @Setter
     private Date createTime;
 
-    public LoggerInfo(Object oldObject, Object newObject, Logger logger) {
+    public LoggerInfo(Object oldObject, Object newObject, Map<String, Object> extDataMap, Logger logger) {
         this.oldObject = oldObject;
         this.newObject = newObject;
+        this.extDataMap = extDataMap;
         this.logger = logger;
         this.createTime = new Date();
     }
