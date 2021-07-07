@@ -47,9 +47,20 @@ public class LoggerInfo {
             multipleTraceInfos = Collections.emptyList();
             return multipleTraceInfos;
         } else if (oldObject instanceof Collection || newObject instanceof Collection) {
-            Collection<?> oldCollection = (Collection) oldObject;
-            Collection<?> newCollection = (Collection) newObject;
-            oldCollection.
+            Object[] oldObjectArray = oldObject == null ? new Object[0] : ((Collection) oldObject).toArray();
+            Object[] newObjectArray = newObject == null ? new Object[0] : ((Collection) newObject).toArray();
+            int length = Math.max(oldObjectArray.length, newObjectArray.length);
+            multipleTraceInfos = new ArrayList<>(length);
+            for (int i = 0; i < length; i++) {
+                Object oldObject = oldObjectArray[i];
+                Object newObject = newObjectArray[i];
+                Class<?> clazz = oldObject != null ? oldObject.getClass() :
+                        (newObject != null ? newObject.getClass() : null);
+                multipleTraceInfos.add(ClassUtils.getTraceFieldInfos(clazz).stream()
+                        .map(e -> buildTraceInfo(e, oldObject, newObject))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()));
+            }
         }
         Class<?> clazz = oldObject != null ? oldObject.getClass() :
                 (newObject != null ? newObject.getClass() : null);
@@ -65,7 +76,7 @@ public class LoggerInfo {
     }
 
     @SneakyThrows
-    private TraceInfo buildTraceInfo(FieldInfo fieldInfo) {
+    private TraceInfo buildTraceInfo(FieldInfo fieldInfo, Object oldObject, Object newObject) {
         Trace trace = fieldInfo.getTrace();
         if (trace.topic().length > 0 && !ArrayUtil.contains(trace.topic(), logger.topic())) {
             return null;
