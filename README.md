@@ -94,7 +94,7 @@ public class CustomConfiguration {
         },
         {
             "id": 2,
-            "name": "王家改名"json
+            "name": "王家改名"
         }
     ]
 }
