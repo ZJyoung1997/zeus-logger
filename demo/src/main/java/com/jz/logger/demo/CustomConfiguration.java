@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CustomConfiguration {
 
-    @Bean("defaultLoggerTraceHandler")
+//    @Bean("defaultLoggerTraceHandler")
     public LoggerTraceHandler loggerTraceHandler() {
         return new CustomTraceHandler();
     }
