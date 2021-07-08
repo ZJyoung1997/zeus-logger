@@ -45,7 +45,6 @@ public class LoggerInfo {
             return multipleTraceInfos;
         } else if (oldObject == null && newObject == null) {
             multipleTraceInfos = Collections.emptyList();
-            return multipleTraceInfos;
         } else if (oldObject instanceof Collection || newObject instanceof Collection) {
             Object[] oldObjectArray = oldObject == null ? new Object[0] : ((Collection) oldObject).toArray();
             Object[] newObjectArray = newObject == null ? new Object[0] : ((Collection) newObject).toArray();
@@ -61,16 +60,17 @@ public class LoggerInfo {
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()));
             }
-        }
-        Class<?> clazz = oldObject != null ? oldObject.getClass() :
-                (newObject != null ? newObject.getClass() : null);
-        if (clazz == null) {
-            multipleTraceInfos = Collections.emptyList();
-        } else if () {
-            traceInfos = ClassUtils.getTraceFieldInfos(clazz).stream()
-                    .map(this::buildTraceInfo)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+        } else {
+            Class<?> clazz = oldObject != null ? oldObject.getClass() : newObject.getClass();
+            if (clazz == null) {
+                multipleTraceInfos = Collections.emptyList();
+            } else {
+                multipleTraceInfos = new ArrayList<>(1);
+                multipleTraceInfos.add(ClassUtils.getTraceFieldInfos(clazz).stream()
+                        .map(e -> buildTraceInfo(e, oldObject, newObject))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()));
+            }
         }
         return multipleTraceInfos;
     }

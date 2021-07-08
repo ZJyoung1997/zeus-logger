@@ -13,8 +13,9 @@ public class DefaultLoggerTraceHandler implements LoggerTraceHandler {
     @Override
     public void execute(LoggerInfo loggerInfo) {
         Logger logger = loggerInfo.getLogger();
-        List<TraceInfo> traceInfos = loggerInfo.getTraceInfos();
-        log.info("日志主题：{}，执行结果：{}", logger.topic(), traceInfos);
+        for (List<TraceInfo> traceInfos : loggerInfo.getTraceInfos()) {
+            log.info("日志主题：{}，执行结果：{}", logger.topic(), traceInfos);
+        }
     }
 
 }
