@@ -22,14 +22,6 @@
         <spring-boot.version>2.5.2</spring-boot.version>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
-
     <dependencyManagement>
         <dependencies>
             <!-- spring boot 依赖 -->
