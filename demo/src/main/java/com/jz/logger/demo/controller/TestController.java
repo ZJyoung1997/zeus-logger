@@ -16,7 +16,7 @@ public class TestController {
 
     private final Mapper mapper;
 
-    @Logger(selectParam = "family.id", selectMethod = "@mapper.get(#root)", topic = "更新房主和朋友圈")
+    @Logger(selectParam = "family?.id", selectMethod = "@mapper.get(#root)", topic = "更新房主和朋友圈")
     @PostMapping(value = "/update")
     public Object update(@RequestBody TestData data) {
         mapper.put(data.getFamily());
