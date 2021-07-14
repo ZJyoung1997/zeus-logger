@@ -6,7 +6,10 @@ import cn.hutool.core.util.ArrayUtil;
 import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.annotation.Trace;
 import com.jz.logger.core.util.ClassUtils;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
@@ -29,15 +32,17 @@ public class LoggerInfo {
     @Getter(AccessLevel.NONE)
     private List<List<TraceInfo>> multipleTraceInfos;
 
-    @Setter
-    private Date createTime;
+    /**
+     * 日志生成时的时间戳
+     */
+    private Long createTime;
 
     public LoggerInfo(Object oldObject, Object newObject, Map<String, Object> extDataMap, Logger logger) {
         this.oldObject = oldObject;
         this.newObject = newObject;
         this.extDataMap = extDataMap;
         this.logger = logger;
-        this.createTime = new Date();
+        this.createTime = System.currentTimeMillis();
     }
 
     public List<List<TraceInfo>> getTraceInfos() {

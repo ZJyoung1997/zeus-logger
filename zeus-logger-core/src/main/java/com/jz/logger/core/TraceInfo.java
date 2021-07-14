@@ -7,7 +7,7 @@ import lombok.*;
 @Getter
 @ToString
 @Setter(AccessLevel.PACKAGE)
-//@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 public class TraceInfo {
 
     private String fieldName;
