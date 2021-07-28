@@ -6,14 +6,18 @@ import com.lmax.disruptor.WorkHandler;
 public class LoggerConsumEventHandler implements EventHandler<LoggerConsumEvent>, WorkHandler<LoggerConsumEvent> {
 
     @Override
-    public void onEvent(LoggerConsumEvent loggerConsumEvent, long sequence, boolean endOfBatch) throws Exception {
+    public void onEvent(LoggerConsumEvent loggerConsumEvent, long sequence, boolean endOfBatch) {
         onEvent(loggerConsumEvent);
     }
 
     @Override
-    public void onEvent(LoggerConsumEvent loggerConsumEvent) throws Exception {
-        loggerConsumEvent.getLoggerTraceHandler()
-                .execute(loggerConsumEvent.getLoggerInfo());
+    public void onEvent(LoggerConsumEvent loggerConsumEvent) {
+        try {
+            loggerConsumEvent.getLoggerTraceHandler()
+                    .execute(loggerConsumEvent.getLoggerInfo());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
