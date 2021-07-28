@@ -38,13 +38,17 @@ public @interface Logger {
 
     /**
      * 禁用全局扩展数据
-     * @return
      */
     boolean disableGlobalExtData() default false;
 
     String handlerBeanName() default "defaultLoggerTraceHandler";
 
     Strategy strategy() default Strategy.ASYN_SERIAL;
+
+    /**
+     * 资源类型
+     */
+    int resourceType() default 0;
 
     int paramIndex() default 0;
 
