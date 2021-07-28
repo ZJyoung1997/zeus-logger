@@ -33,15 +33,12 @@ public class LoggerAspect implements BeanFactoryAware {
 
     private final LoggerHandler loggerHandler;
 
-    private BeanFactory beanFactory;
-
     public LoggerAspect(LoggerHandler loggerHandler) {
         this.loggerHandler = loggerHandler;
     }
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = beanFactory;
         this.evaluationContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
     }
 
