@@ -14,10 +14,11 @@ public interface LoggerExtensionData {
     }
 
     /**
-     * @param param {@link com.jz.logger.core.annotation.Logger#selectParam()} 结果
+     * @param oldObject 方法执行前 {@link com.jz.logger.core.annotation.Logger#selectParam()} 结果
+     * @param newObject 方法执行后 {@link com.jz.logger.core.annotation.Logger#selectParam()} 结果
      * @return
      */
-    default Map<String, Object> getExtData(Object param) {
+    default Map<String, Object> getExtData(Object oldObject, Object newObject) {
         return null;
     }
 

@@ -6,7 +6,6 @@ import com.jz.logger.core.LoggerInfo;
 import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.enumerate.Strategy;
 import com.jz.logger.core.event.LoggerEventProvider;
-import com.jz.logger.core.util.ClassUtils;
 import lombok.Setter;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -20,8 +19,6 @@ import java.util.stream.Collectors;
  * @Date 2021/7/6 15:03
  */
 public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
-
-    private static final String DEFAULT_LOGGER_TRACE_HANDLER_BEAN_NAME = "defaultLoggerTraceHandler";
 
     private final LoggerEventProvider loggerEventProvider;
 
@@ -59,7 +56,7 @@ public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
     public void handleLogger(Object oldObject, Object newObject, Logger logger) {
         LoggerTraceHandler loggerTraceHandler = beanFactory.getBean(logger.handlerBeanName(), LoggerTraceHandler.class);
         Strategy realStrategy = Strategy.DEFAULT == logger.strategy() ? this.strategy : logger.strategy();
-        LoggerInfo loggerInfo = new LoggerInfo(oldObject, newObject, getExtData(oldObject, logger), logger);
+        LoggerInfo loggerInfo = new LoggerInfo(oldObject, newObject, getExtData(oldObject, newObject, logger), logger);
         if (Strategy.SYNC == realStrategy) {
             loggerTraceHandler.execute(loggerInfo);
         } else if (Strategy.ASYN_SERIAL == realStrategy) {
@@ -72,7 +69,7 @@ public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
     /**
      * 获取扩展数据
      */
-    private Map<String, Object> getExtData(Object oldObject, Logger logger) {
+    private Map<String, Object> getExtData(Object oldObject, Object newObject, Logger logger) {
         List<LoggerExtensionData> extensionDataList = new ArrayList<>();
         if (!logger.disableGlobalExtData() && globalExtDatas != null) {
             extensionDataList.addAll(globalExtDatas);
@@ -80,17 +77,16 @@ public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
         Class<?>[] customExtDatas = logger.customExtData();
         if (ArrayUtil.isNotEmpty(customExtDatas)) {
             extensionDataList.addAll(Arrays.stream(customExtDatas)
-                    .filter(extClazz -> ClassUtils.hasInterface(extClazz, LoggerExtensionData.class))
                     .map(extClazz -> (LoggerExtensionData) beanFactory.getBean(extClazz))
                     .collect(Collectors.toList()));
         }
-        Map<String, Object> extDataMap = new HashMap<>(extensionDataList.size());
-        for (LoggerExtensionData globalExtData : extensionDataList) {
-            Map<String, Object> extData = globalExtData.getExtData();
+        Map<String, Object> extDataMap = new HashMap<>();
+        for (LoggerExtensionData loggerExtData : extensionDataList) {
+            Map<String, Object> extData = loggerExtData.getExtData();
             if (extData != null) {
                 extDataMap.putAll(extData);
             }
-            extData = globalExtData.getExtData(oldObject);
+            extData = loggerExtData.getExtData(oldObject, newObject);
             if (extData != null) {
                 extDataMap.putAll(extData);
             }

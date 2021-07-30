@@ -52,10 +52,11 @@ public class LoggerConfiguration {
                         try {
                             Class<?> clazz = Class.forName(extDataClass);
                             if (ClassUtils.hasInterface(clazz, LoggerExtensionData.class)) {
+                                log.info("load LoggerExtensionData：{}", extDataClass);
                                 return clazz;
                             }
                         } catch (ClassNotFoundException e) {
-                            log.info(e.getMessage());
+                            log.warn(e.getMessage());
                         }
                         return null;
                     }).filter(Objects::nonNull).collect(Collectors.toList());
