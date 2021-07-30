@@ -2,6 +2,8 @@ package com.jz.logger.core.util;
 
 import com.jz.logger.core.FieldInfo;
 import com.jz.logger.core.annotation.Trace;
+import com.jz.logger.core.converters.Converter;
+import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.springframework.lang.NonNull;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -15,13 +17,26 @@ import java.util.Map;
 @UtilityClass
 public class ClassUtils {
 
-    private static final Map<Class<?>, List<FieldInfo>> fieldInfoCache = new ConcurrentReferenceHashMap<>();
+    private static final Map<Class<?>, List<FieldInfo>> FIELD_INFO_CACHE = new ConcurrentReferenceHashMap<>();
+
+    private static final Map<Class<?>, Converter<?, ?>> CONVERTER_CACHE = new ConcurrentReferenceHashMap<>();
+
+    @SneakyThrows
+    public Converter<?, ?> getConverterInstance(Class<?> clazz) {
+        Converter<?, ?> converter = CONVERTER_CACHE.get(clazz);
+        if (converter != null) {
+            return converter;
+        }
+        converter = (Converter<?, ?>) clazz.getDeclaredConstructor().newInstance();
+        CONVERTER_CACHE.put(clazz, converter);
+        return converter;
+    }
 
     public List<FieldInfo> getTraceFieldInfos(Class<?> clazz) {
-        List<FieldInfo> classTraces = fieldInfoCache.get(clazz);
+        List<FieldInfo> classTraces = FIELD_INFO_CACHE.get(clazz);
         if (classTraces == null) {
-            synchronized (fieldInfoCache) {
-                classTraces = fieldInfoCache.get(clazz);
+            synchronized (FIELD_INFO_CACHE) {
+                classTraces = FIELD_INFO_CACHE.get(clazz);
                 if (classTraces == null) {
                     classTraces = new ArrayList<>();
                     for (Field field : clazz.getDeclaredFields()) {
@@ -31,9 +46,9 @@ public class ClassUtils {
                         }
                     }
                     if (classTraces.isEmpty()) {
-                        fieldInfoCache.put(clazz, Collections.emptyList());
+                        FIELD_INFO_CACHE.put(clazz, Collections.emptyList());
                     } else {
-                        fieldInfoCache.put(clazz, classTraces);
+                        FIELD_INFO_CACHE.put(clazz, classTraces);
                     }
                 }
             }

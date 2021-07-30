@@ -1,7 +1,7 @@
 package com.jz.logger.core.annotation;
 
-import com.jz.logger.core.enumerate.Strategy;
 import com.jz.logger.core.LoggerExtensionData;
+import com.jz.logger.core.enumerate.Strategy;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -49,6 +49,11 @@ public @interface Logger {
      * 资源类型
      */
     int resourceType() default 0;
+
+    /**
+     * 操作类型
+     */
+    int operationType() default 0;
 
     int paramIndex() default 0;
 

@@ -2,10 +2,12 @@ package com.jz.logger.core;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.ArrayUtil;
 import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.annotation.Trace;
+import com.jz.logger.core.converters.Converter;
+import com.jz.logger.core.converters.DefaultConverter;
 import com.jz.logger.core.util.ClassUtils;
+import com.jz.logger.core.util.LoggerUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -61,7 +63,7 @@ public class LoggerInfo {
                 Class<?> clazz = oldObject != null ? oldObject.getClass() :
                         (newObject != null ? newObject.getClass() : null);
                 multipleTraceInfos.add(ClassUtils.getTraceFieldInfos(clazz).stream()
-                        .map(e -> buildTraceInfo(e, oldObject, newObject))
+                        .map(e -> buildTraceInfo(e, oldObject, newObject, clazz))
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()));
             }
@@ -72,7 +74,7 @@ public class LoggerInfo {
             } else {
                 multipleTraceInfos = new ArrayList<>(1);
                 multipleTraceInfos.add(ClassUtils.getTraceFieldInfos(clazz).stream()
-                        .map(e -> buildTraceInfo(e, oldObject, newObject))
+                        .map(e -> buildTraceInfo(e, oldObject, newObject, clazz))
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()));
             }
@@ -81,12 +83,9 @@ public class LoggerInfo {
     }
 
     @SneakyThrows
-    private TraceInfo buildTraceInfo(FieldInfo fieldInfo, Object oldObject, Object newObject) {
+    private TraceInfo buildTraceInfo(FieldInfo fieldInfo, Object oldObject, Object newObject, Class<?> clazz) {
         Trace trace = fieldInfo.getTrace();
-        if (trace.topic().length > 0 && !ArrayUtil.contains(trace.topic(), logger.topic())) {
-            return null;
-        }
-        if (trace.resourceType().length > 0 && !ArrayUtil.contains(trace.resourceType(), logger.resourceType())) {
+        if (!LoggerUtils.isMatch(logger, trace)) {
             return null;
         }
         Field field = fieldInfo.getField();
@@ -101,12 +100,18 @@ public class LoggerInfo {
         if (isEqual(oldValue, newValue)) {
             return null;
         }
+        Converter converter = ClassUtils.getConverterInstance(clazz);
         TraceInfo traceInfo = new TraceInfo();
-        traceInfo.setOldValue(oldValue);
-        traceInfo.setNewValue(newValue);
         traceInfo.setTag(trace.tag());
         traceInfo.setOrder(trace.order());
         traceInfo.setFieldName(field.getName());
+        if (converter instanceof DefaultConverter) {
+            traceInfo.setOldValue(oldValue);
+            traceInfo.setNewValue(newValue);
+        } else {
+            traceInfo.setOldValue(converter.transform(oldValue));
+            traceInfo.setNewValue(converter.transform(newValue));
+        }
         return traceInfo;
     }
 

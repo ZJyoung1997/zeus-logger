@@ -14,7 +14,7 @@ public class Family {
 
     private Integer id;
 
-    @Trace("家庭名称")
+    @Trace(tag = "家庭名称")
     private String name;
 
     @Trace(tag = "主人", targetValue = "#root?.name")

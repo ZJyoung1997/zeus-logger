@@ -1,6 +1,7 @@
 package com.jz.logger.core;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.annotation.Trace;
 import lombok.*;
 
