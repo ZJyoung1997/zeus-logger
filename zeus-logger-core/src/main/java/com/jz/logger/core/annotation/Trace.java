@@ -28,10 +28,16 @@ public @interface Trace {
     String targetValue() default "";
 
     /**
-     * 指定后将在指定topic时生效
+     * 指定后将在指定 {@link Logger#topic} 时生效
      * @return
      */
     String[] topic() default {};
+
+    /**
+     * 指定后将在指定 {@link Logger#resourceType} 时生效
+     * @return
+     */
+    int[] resourceType() default {};
 
     int order() default 0;
 

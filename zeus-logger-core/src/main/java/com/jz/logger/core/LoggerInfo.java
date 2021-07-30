@@ -86,6 +86,9 @@ public class LoggerInfo {
         if (trace.topic().length > 0 && !ArrayUtil.contains(trace.topic(), logger.topic())) {
             return null;
         }
+        if (trace.resourceType().length > 0 && !ArrayUtil.contains(trace.resourceType(), logger.resourceType())) {
+            return null;
+        }
         Field field = fieldInfo.getField();
         field.setAccessible(true);
         Object oldValue = oldObject == null ? null : field.get(oldObject);
