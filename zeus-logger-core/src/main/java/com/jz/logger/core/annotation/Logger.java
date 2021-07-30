@@ -26,7 +26,7 @@ public @interface Logger {
     /**
      * 值为spel表达式，该表达式的结果将作为目标对象的新旧快照
      * 例：
-     * 若方法有入参则支持持单个入参，其值为 #{@link #selectParam()} 的结果，@beanName.get(#root)
+     * 若方法有入参则只支持单个入参，其值为 #{@link #selectParam()} 的结果，@beanName.get(#root)
      * 若方法无参，@beanName.get()
      */
     String selectMethod() default "";
@@ -43,7 +43,7 @@ public @interface Logger {
 
     String handlerBeanName() default "defaultLoggerTraceHandler";
 
-    Strategy strategy() default Strategy.ASYN_SERIAL;
+    Strategy strategy() default Strategy.DEFAULT;
 
     /**
      * 资源类型

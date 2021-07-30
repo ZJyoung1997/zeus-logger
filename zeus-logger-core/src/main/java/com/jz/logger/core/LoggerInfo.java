@@ -56,8 +56,8 @@ public class LoggerInfo {
             int length = Math.max(oldObjectArray.length, newObjectArray.length);
             multipleTraceInfos = new ArrayList<>(length);
             for (int i = 0; i < length; i++) {
-                Object oldObject = oldObjectArray[i];
-                Object newObject = newObjectArray[i];
+                Object oldObject = oldObjectArray.length <= i ? null : oldObjectArray[i];
+                Object newObject = newObjectArray.length <= i ? null : newObjectArray[i];
                 Class<?> clazz = oldObject != null ? oldObject.getClass() :
                         (newObject != null ? newObject.getClass() : null);
                 multipleTraceInfos.add(ClassUtils.getTraceFieldInfos(clazz).stream()
@@ -95,7 +95,7 @@ public class LoggerInfo {
             oldValue = parser.parseExpression(trace.targetValue()).getValue(oldValue);
             newValue = parser.parseExpression(trace.targetValue()).getValue(newValue);
         }
-        if (isEqual(oldObject, newObject)) {
+        if (isEqual(oldValue, newValue)) {
             return null;
         }
         TraceInfo traceInfo = new TraceInfo();

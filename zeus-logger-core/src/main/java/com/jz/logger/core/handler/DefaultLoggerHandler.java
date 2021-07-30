@@ -11,7 +11,6 @@ import lombok.Setter;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,8 +23,6 @@ public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
 
     private static final String DEFAULT_LOGGER_TRACE_HANDLER_BEAN_NAME = "defaultLoggerTraceHandler";
 
-    private final Map<String, LoggerTraceHandler> loggerTraceHandlerCache = new ConcurrentReferenceHashMap<>();
-
     private final LoggerEventProvider loggerEventProvider;
 
     private List<LoggerExtensionData> globalExtDatas;
@@ -35,15 +32,20 @@ public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
 
     private BeanFactory beanFactory;
 
+    private Strategy strategy;
 
-    public DefaultLoggerHandler(LoggerEventProvider loggerEventProvider) {
+    public DefaultLoggerHandler(LoggerEventProvider loggerEventProvider, Strategy strategy) {
         this.loggerEventProvider = loggerEventProvider;
+        if (strategy == null) {
+            this.strategy = Strategy.ASYN_SERIAL;
+        } else {
+            this.strategy = strategy;
+        }
     }
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
-        loggerTraceHandlerCache.put(DEFAULT_LOGGER_TRACE_HANDLER_BEAN_NAME, beanFactory.getBean(DEFAULT_LOGGER_TRACE_HANDLER_BEAN_NAME, LoggerTraceHandler.class));
         if (globalExtDataClass != null) {
             globalExtDatas = globalExtDataClass.stream()
                     .map(extDataClass -> (LoggerExtensionData) beanFactory.getBean(extDataClass))
@@ -56,13 +58,13 @@ public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
     @Override
     public void handleLogger(Object oldObject, Object newObject, Logger logger) {
         LoggerTraceHandler loggerTraceHandler = beanFactory.getBean(logger.handlerBeanName(), LoggerTraceHandler.class);
-        Strategy strategy = logger.strategy();
+        Strategy realStrategy = Strategy.DEFAULT == logger.strategy() ? this.strategy : logger.strategy();
         LoggerInfo loggerInfo = new LoggerInfo(oldObject, newObject, getExtData(oldObject, logger), logger);
-        if (Strategy.SYNC == strategy) {
+        if (Strategy.SYNC == realStrategy) {
             loggerTraceHandler.execute(loggerInfo);
-        } else if (Strategy.ASYN_SERIAL == strategy) {
+        } else if (Strategy.ASYN_SERIAL == realStrategy) {
             loggerEventProvider.publishWithSerial(loggerInfo, loggerTraceHandler);
-        } else if (Strategy.ASYN_CONCURRENT == strategy) {
+        } else if (Strategy.ASYN_CONCURRENT == realStrategy) {
             loggerEventProvider.publishWithConcurrent(loggerInfo, loggerTraceHandler);
         }
     }
@@ -94,15 +96,6 @@ public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
             }
         }
         return extDataMap;
-    }
-
-    private LoggerTraceHandler getLoggerTraceHandler(String loggerHandlerBeanName) {
-        LoggerTraceHandler loggerTraceHandler = loggerTraceHandlerCache.get(loggerHandlerBeanName);
-        if (loggerTraceHandler == null) {
-            loggerTraceHandler = beanFactory.getBean(loggerHandlerBeanName, LoggerTraceHandler.class);
-            loggerTraceHandlerCache.put(loggerHandlerBeanName, loggerTraceHandler);
-        }
-        return loggerTraceHandler;
     }
 
 }

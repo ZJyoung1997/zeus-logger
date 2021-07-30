@@ -2,6 +2,8 @@ package com.jz.logger.core.enumerate;
 
 public enum Strategy {
 
+    DEFAULT,
+
     SYNC,
 
     /**
