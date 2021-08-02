@@ -56,7 +56,7 @@ public class LoggerConfiguration {
                                 log.info("load global LoggerExtensionData：{}", extDataClass);
                                 return clazz;
                             } else {
-                                log.warn("skip {} . Because unimplemented LoggerExtensionData", extDataClass);
+                                log.warn("skip {} . Because unimplemented com.jz.logger.core.LoggerExtensionData", extDataClass);
                             }
                         } catch (ClassNotFoundException e) {
                             log.warn(e.getMessage());
