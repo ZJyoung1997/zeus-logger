@@ -4,14 +4,12 @@ import com.jz.logger.core.TraceInfo;
 import com.jz.logger.core.converters.Converter;
 import com.jz.logger.core.converters.DefaultConverter;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * @author jz
  */
+@Inherited
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Trace {

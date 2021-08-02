@@ -39,11 +39,15 @@ public class ClassUtils {
                 classTraces = FIELD_INFO_CACHE.get(clazz);
                 if (classTraces == null) {
                     classTraces = new ArrayList<>();
-                    for (Field field : clazz.getDeclaredFields()) {
-                        Trace trace = field.getAnnotation(Trace.class);
-                        if (trace != null) {
-                            classTraces.add(new FieldInfo(trace, field));
+                    Class<?> superclass = clazz;
+                    while (superclass != Object.class) {
+                        for (Field field : superclass.getDeclaredFields()) {
+                            Trace trace = field.getAnnotation(Trace.class);
+                            if (trace != null) {
+                                classTraces.add(new FieldInfo(trace, field));
+                            }
                         }
+                        superclass = superclass.getSuperclass();
                     }
                     if (classTraces.isEmpty()) {
                         FIELD_INFO_CACHE.put(clazz, Collections.emptyList());
