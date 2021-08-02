@@ -55,6 +55,8 @@ public class LoggerConfiguration {
                             if (ClassUtils.hasInterface(clazz, LoggerExtensionData.class)) {
                                 log.info("load global LoggerExtensionData：{}", extDataClass);
                                 return clazz;
+                            } else {
+                                log.warn("skip {} . Because unimplemented LoggerExtensionData", extDataClass);
                             }
                         } catch (ClassNotFoundException e) {
                             log.warn(e.getMessage());
