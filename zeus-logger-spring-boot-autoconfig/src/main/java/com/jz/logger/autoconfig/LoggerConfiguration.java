@@ -53,7 +53,7 @@ public class LoggerConfiguration {
                         try {
                             Class<?> clazz = Class.forName(extDataClass);
                             if (ClassUtils.hasInterface(clazz, LoggerExtensionData.class)) {
-                                log.info("load global LoggerExtensionData：{}", extDataClass);
+                                log.info("load global LoggerExtensionData: {}", extDataClass);
                                 return clazz;
                             } else {
                                 log.warn("skip {} . Because unimplemented com.jz.logger.core.LoggerExtensionData", extDataClass);
