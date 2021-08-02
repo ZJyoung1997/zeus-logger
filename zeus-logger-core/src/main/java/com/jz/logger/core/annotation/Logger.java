@@ -2,6 +2,8 @@ package com.jz.logger.core.annotation;
 
 import com.jz.logger.core.LoggerExtensionData;
 import com.jz.logger.core.enumerate.Strategy;
+import com.jz.logger.core.handler.DefaultLoggerTraceHandler;
+import com.jz.logger.core.handler.LoggerTraceHandler;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -41,7 +43,11 @@ public @interface Logger {
      */
     boolean disableGlobalExtData() default false;
 
-    String handlerBeanName() default "defaultLoggerTraceHandler";
+    /**
+     * 指定 LoggerTraceHandler 处理器
+     * @return
+     */
+    Class<? extends LoggerTraceHandler> traceHandler() default DefaultLoggerTraceHandler.class;
 
     Strategy strategy() default Strategy.DEFAULT;
 

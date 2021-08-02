@@ -4,6 +4,7 @@ import cn.hutool.core.util.ArrayUtil;
 import com.jz.logger.core.LoggerExtensionData;
 import com.jz.logger.core.LoggerInfo;
 import com.jz.logger.core.annotation.Logger;
+import com.jz.logger.core.constant.Constants;
 import com.jz.logger.core.enumerate.Strategy;
 import com.jz.logger.core.event.LoggerEventProvider;
 import lombok.Setter;
@@ -54,7 +55,12 @@ public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
 
     @Override
     public void handleLogger(Object oldObject, Object newObject, Logger logger) {
-        LoggerTraceHandler loggerTraceHandler = beanFactory.getBean(logger.handlerBeanName(), LoggerTraceHandler.class);
+        LoggerTraceHandler loggerTraceHandler;
+        if (DefaultLoggerTraceHandler.class == logger.traceHandler()) {
+            loggerTraceHandler = beanFactory.getBean(Constants.DEFAULT_LOGGER_TRACE_HANDLER, LoggerTraceHandler.class);
+        } else {
+            loggerTraceHandler = beanFactory.getBean(logger.traceHandler());
+        }
         Strategy realStrategy = Strategy.DEFAULT == logger.strategy() ? this.strategy : logger.strategy();
         LoggerInfo loggerInfo = new LoggerInfo(oldObject, newObject, getExtData(oldObject, newObject, logger), logger);
         if (Strategy.SYNC == realStrategy) {

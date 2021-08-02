@@ -63,7 +63,7 @@ public class LoggerInfo {
                 Class<?> clazz = oldObject != null ? oldObject.getClass() :
                         (newObject != null ? newObject.getClass() : null);
                 multipleTraceInfos.add(ClassUtils.getTraceFieldInfos(clazz).stream()
-                        .map(e -> buildTraceInfo(e, oldObject, newObject, clazz))
+                        .map(e -> buildTraceInfo(e, oldObject, newObject))
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()));
             }
@@ -74,7 +74,7 @@ public class LoggerInfo {
             } else {
                 multipleTraceInfos = new ArrayList<>(1);
                 multipleTraceInfos.add(ClassUtils.getTraceFieldInfos(clazz).stream()
-                        .map(e -> buildTraceInfo(e, oldObject, newObject, clazz))
+                        .map(e -> buildTraceInfo(e, oldObject, newObject))
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()));
             }
@@ -83,7 +83,7 @@ public class LoggerInfo {
     }
 
     @SneakyThrows
-    private TraceInfo buildTraceInfo(FieldInfo fieldInfo, Object oldObject, Object newObject, Class<?> clazz) {
+    private TraceInfo buildTraceInfo(FieldInfo fieldInfo, Object oldObject, Object newObject) {
         Trace trace = fieldInfo.getTrace();
         if (!LoggerUtils.isMatch(logger, trace)) {
             return null;
@@ -100,7 +100,7 @@ public class LoggerInfo {
         if (isEqual(oldValue, newValue)) {
             return null;
         }
-        Converter converter = ClassUtils.getConverterInstance(clazz);
+        Converter converter = ClassUtils.getConverterInstance(trace.converter());
         TraceInfo traceInfo = new TraceInfo();
         traceInfo.setTag(trace.tag());
         traceInfo.setOrder(trace.order());

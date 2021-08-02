@@ -16,7 +16,12 @@
         <module>zeus-logger-spring-boot-starter</module>
         <module>demo</module>
     </modules>
-
+    <distributionManagement>
+        <repository>
+            <id>maven-snapshots</id>
+            <url>https://nexus3.hypers.cc/repository/maven-snapshots/</url>
+        </repository>
+    </distributionManagement>
     <properties>
         <java.version>11</java.version>
         <spring-boot.version>2.5.2</spring-boot.version>

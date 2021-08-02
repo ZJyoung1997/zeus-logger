@@ -3,6 +3,7 @@ package com.jz.logger.autoconfig;
 import cn.hutool.core.collection.CollUtil;
 import com.jz.logger.core.LoggerExtensionData;
 import com.jz.logger.core.aspect.LoggerAspect;
+import com.jz.logger.core.constant.Constants;
 import com.jz.logger.core.event.LoggerConsumEvent;
 import com.jz.logger.core.event.LoggerConsumEventHandler;
 import com.jz.logger.core.event.LoggerEeventFactory;
@@ -37,7 +38,7 @@ public class LoggerConfiguration {
     private LoggerProperties loggerProperties;
 
     @Bean
-    @ConditionalOnMissingBean(name = "defaultLoggerTraceHandler")
+    @ConditionalOnMissingBean(name = Constants.DEFAULT_LOGGER_TRACE_HANDLER)
     public LoggerTraceHandler defaultLoggerTraceHandler() {
         return new DefaultLoggerTraceHandler();
     }
