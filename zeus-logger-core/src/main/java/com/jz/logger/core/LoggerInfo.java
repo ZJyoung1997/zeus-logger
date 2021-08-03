@@ -116,7 +116,9 @@ public class LoggerInfo {
     }
 
     private boolean isEqual(Object oldObject, Object newObject) {
-        if (oldObject != null && oldObject.equals(newObject)) {
+        if (oldObject == newObject) {
+            return true;
+        } else if (oldObject != null && oldObject.equals(newObject)) {
             return true;
         } else if (newObject != null && newObject.equals(oldObject)) {
             return true;
