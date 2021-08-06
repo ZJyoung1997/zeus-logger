@@ -1,6 +1,8 @@
 package com.jz.logger.core.annotation;
 
 import com.jz.logger.core.LoggerExtensionData;
+import com.jz.logger.core.converters.Converter;
+import com.jz.logger.core.converters.DefaultConverter;
 import com.jz.logger.core.enumerate.Strategy;
 import com.jz.logger.core.handler.DefaultLoggerTraceHandler;
 import com.jz.logger.core.handler.LoggerTraceHandler;
@@ -24,6 +26,11 @@ public @interface Logger {
      * 获取到的值将作为 {@link #selectMethod()} 方法的入参
      */
     String selectParam() default "#root";
+
+    /**
+     * 将 {@link #selectParam()} 获取到的值进行转换
+     */
+    Class<? extends Converter> paramConverter() default DefaultConverter.class;
 
     /**
      * 值为spel表达式，该表达式的结果将作为目标对象的新旧快照

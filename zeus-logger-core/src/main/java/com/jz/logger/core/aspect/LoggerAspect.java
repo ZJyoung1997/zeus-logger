@@ -2,8 +2,10 @@ package com.jz.logger.core.aspect;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.jz.logger.core.annotation.Logger;
+import com.jz.logger.core.converters.Converter;
 import com.jz.logger.core.handler.LoggerHandler;
 import com.jz.logger.core.holder.LoggerHolder;
+import com.jz.logger.core.util.ClassUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -77,7 +79,8 @@ public class LoggerAspect implements BeanFactoryAware {
         Object selectParam = args[logger.paramIndex()];
         Expression expression = PARSER.parseExpression(logger.selectParam());
         selectParam = expression.getValue(selectParam);
-        return selectParam;
+        Converter converter = ClassUtils.getConverterInstance(logger.paramConverter());
+        return converter.transform(selectParam);
     }
 
 }
