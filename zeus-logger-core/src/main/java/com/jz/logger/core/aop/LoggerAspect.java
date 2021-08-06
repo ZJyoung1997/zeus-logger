@@ -1,4 +1,4 @@
-package com.jz.logger.core.aspect;
+package com.jz.logger.core.aop;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.jz.logger.core.annotation.Logger;
@@ -20,13 +20,10 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 
 @Slf4j
-@Aspect
-@Component
 public class LoggerAspect implements BeanFactoryAware {
 
     private final ExpressionParser PARSER = new SpelExpressionParser();

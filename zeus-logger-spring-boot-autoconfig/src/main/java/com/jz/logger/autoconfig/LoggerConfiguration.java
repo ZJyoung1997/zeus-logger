@@ -2,7 +2,8 @@ package com.jz.logger.autoconfig;
 
 import cn.hutool.core.collection.CollUtil;
 import com.jz.logger.core.LoggerExtensionData;
-import com.jz.logger.core.aspect.LoggerAspect;
+import com.jz.logger.core.annotation.Logger;
+import com.jz.logger.core.aop.LoggerAroundAdvice;
 import com.jz.logger.core.constant.Constants;
 import com.jz.logger.core.event.LoggerConsumEvent;
 import com.jz.logger.core.event.LoggerConsumEventHandler;
@@ -18,6 +19,12 @@ import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.annotation.Aspect;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.Pointcut;
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +37,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Aspect
 @Configuration
 @EnableConfigurationProperties(LoggerProperties.class)
 public class LoggerConfiguration {
@@ -69,9 +77,23 @@ public class LoggerConfiguration {
     }
 
     @Bean
-    public LoggerAspect loggerAspect() {
-        return new LoggerAspect(loggerHandler());
+    public LoggerAroundAdvice loggerAroundAdvice() {
+        return new LoggerAroundAdvice(loggerHandler());
     }
+
+    @Bean
+    public Advisor zeusLoggerAdvisor() {
+        Pointcut pointcut = new AnnotationMatchingPointcut(Logger.class, true);
+        return new DefaultPointcutAdvisor(pointcut, loggerAroundAdvice());
+    }
+
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator() {
+//        DefaultAdvisorAutoProxyCreator creator = new DefaultAdvisorAutoProxyCreator();
+//        creator.setProxyTargetClass(true);
+//        return creator;
+//    }
 
     @Bean
     public LoggerEventProvider loggerEventProvider() {
