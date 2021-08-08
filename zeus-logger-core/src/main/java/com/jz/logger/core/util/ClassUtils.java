@@ -43,7 +43,8 @@ public class ClassUtils {
                     while (superclass != Object.class) {
                         for (Field field : superclass.getDeclaredFields()) {
                             Trace trace = field.getAnnotation(Trace.class);
-                            if (trace != null) {
+                            if (trace != null && classTraces.stream()
+                                    .noneMatch(e -> e.getField().getName().equals(field.getName()))) {
                                 classTraces.add(new FieldInfo(trace, field));
                             }
                         }

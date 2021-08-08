@@ -19,7 +19,6 @@ import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.annotation.Aspect;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
@@ -37,7 +36,6 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Aspect
 @Configuration
 @EnableConfigurationProperties(LoggerProperties.class)
 public class LoggerConfiguration {
@@ -82,18 +80,10 @@ public class LoggerConfiguration {
     }
 
     @Bean
-    public Advisor zeusLoggerAdvisor() {
-        Pointcut pointcut = new AnnotationMatchingPointcut(Logger.class, true);
+    public DefaultPointcutAdvisor zeusLoggerAdvisor() {
+        Pointcut pointcut = new AnnotationMatchingPointcut(null, Logger.class, true);
         return new DefaultPointcutAdvisor(pointcut, loggerAroundAdvice());
     }
-
-//    @Bean
-//    @ConditionalOnMissingBean
-//    public DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator() {
-//        DefaultAdvisorAutoProxyCreator creator = new DefaultAdvisorAutoProxyCreator();
-//        creator.setProxyTargetClass(true);
-//        return creator;
-//    }
 
     @Bean
     public LoggerEventProvider loggerEventProvider() {

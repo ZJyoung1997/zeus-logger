@@ -12,11 +12,10 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-public class TestController {
+public class TestController implements BaseController {
 
     private final Mapper mapper;
 
-    @Logger(selectParam = "family?.id", selectMethod = "@mapper.get(#root)", topic = "更新房主和朋友圈")
     @PostMapping(value = "/update")
     public Object update(@RequestBody TestData data) {
         mapper.put(data.getFamily());

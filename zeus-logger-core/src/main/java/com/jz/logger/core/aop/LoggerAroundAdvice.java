@@ -6,6 +6,8 @@ import com.jz.logger.core.converters.Converter;
 import com.jz.logger.core.handler.LoggerHandler;
 import com.jz.logger.core.holder.LoggerHolder;
 import com.jz.logger.core.util.ClassUtils;
+import com.jz.logger.core.util.MethodUtils;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
@@ -49,8 +51,10 @@ public class LoggerAroundAdvice implements MethodBeforeAdvice, AfterReturningAdv
     }
 
     @Override
-    public void before(Method method, Object[] args, Object o) {
-        Logger logger = method.getAnnotation(Logger.class);
+    @SneakyThrows
+    public void before(Method method, Object[] args, Object targetObject) {
+        Logger logger = MethodUtils.getMethodAnnotation(method, Logger.class);
+
         newObject.remove();
         oldObject.remove();
         selectParam.remove();
@@ -64,7 +68,7 @@ public class LoggerAroundAdvice implements MethodBeforeAdvice, AfterReturningAdv
 
     @Override
     public void afterReturning(Object returnValue, Method method, Object[] args, Object o1) {
-        Logger logger = method.getAnnotation(Logger.class);
+        Logger logger = MethodUtils.getMethodAnnotation(method, Logger.class);
         if (CharSequenceUtil.isBlank(logger.selectMethod())) {
             if (LoggerHolder.isRecorded()) {
                 oldObject.set(LoggerHolder.getOldObject());
