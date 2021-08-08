@@ -3,6 +3,8 @@ package com.jz.logger.core.annotation;
 import com.jz.logger.core.LoggerExtensionData;
 import com.jz.logger.core.converters.Converter;
 import com.jz.logger.core.converters.DefaultConverter;
+import com.jz.logger.core.converters.DefaultMethodParameterConverter;
+import com.jz.logger.core.converters.MethodParameterConverter;
 import com.jz.logger.core.enumerate.Strategy;
 import com.jz.logger.core.handler.DefaultLoggerTraceHandler;
 import com.jz.logger.core.handler.LoggerTraceHandler;
@@ -33,12 +35,20 @@ public @interface Logger {
     Class<? extends Converter> paramConverter() default DefaultConverter.class;
 
     /**
-     * 值为spel表达式，该表达式的结果将作为目标对象的新旧快照
-     * 例：
-     * 若方法有入参则只支持单个入参，其值为 #{@link #selectParam()} 的结果，@beanName.get(#root)
-     * 若方法无参，@beanName.get()
+     * 对 Logger 注解标注的方法的所有入参进行转换，
+     * 若定义该转换器，则 {@link #selectParam()}、{@link #paramConverter()}、{@link #paramIndex()} 将无效
      */
-    String selectMethod() default "";
+    Class<? extends MethodParameterConverter> methodParamConverter() default DefaultMethodParameterConverter.class;
+
+    /**
+     * 值为spel表达式，该表达式的结果将作为目标对象的新旧快照。
+     * 当 {@link #methodParamConverter()} 为默认值时，方法入参为 #{@link #selectParam()} 的结果，
+     * 只支持单个入参，@beanName.get(#root) ，若方法无参，@beanName.get()。
+     *
+     * 当 {@link #methodParamConverter()} 不为默认值时，方法的入参为 #{@link #methodParamConverter()} 的结果，
+     * 此时方法可以支持多个入参，但其spel表达式要支持，例如：@mapper.get(#root[0], #root[1])
+     */
+    String selectMethod() default "#root";
 
     /**
      * 自定义扩展数据，需实现 {@link LoggerExtensionData} 接口
@@ -69,5 +79,10 @@ public @interface Logger {
     int operationType() default 0;
 
     int paramIndex() default 0;
+
+    /**
+     * 是否开启手动记录日志，true 开启、false 关闭
+     */
+    boolean enabledManual() default false;
 
 }

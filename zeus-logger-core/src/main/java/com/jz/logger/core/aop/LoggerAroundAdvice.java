@@ -3,6 +3,7 @@ package com.jz.logger.core.aop;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.converters.Converter;
+import com.jz.logger.core.converters.DefaultMethodParameterConverter;
 import com.jz.logger.core.handler.LoggerHandler;
 import com.jz.logger.core.holder.LoggerHolder;
 import com.jz.logger.core.util.ClassUtils;
@@ -58,7 +59,7 @@ public class LoggerAroundAdvice implements MethodBeforeAdvice, AfterReturningAdv
         newObject.remove();
         oldObject.remove();
         selectParam.remove();
-        if (CharSequenceUtil.isBlank(logger.selectMethod())) {
+        if (logger.enabledManual()) {
             return;
         }
         selectParam.set(getSelectParam(logger, args));
@@ -69,7 +70,7 @@ public class LoggerAroundAdvice implements MethodBeforeAdvice, AfterReturningAdv
     @Override
     public void afterReturning(Object returnValue, Method method, Object[] args, Object o1) {
         Logger logger = MethodUtils.getMethodAnnotation(method, Logger.class);
-        if (CharSequenceUtil.isBlank(logger.selectMethod())) {
+        if (logger.enabledManual()) {
             if (LoggerHolder.isRecorded()) {
                 oldObject.set(LoggerHolder.getOldObject());
                 newObject.set(LoggerHolder.getNewObject());
@@ -84,6 +85,10 @@ public class LoggerAroundAdvice implements MethodBeforeAdvice, AfterReturningAdv
     }
 
     private Object getSelectParam(Logger logger, Object[] args) {
+        if (DefaultMethodParameterConverter.class != logger.methodParamConverter()) {
+            Converter converter = ClassUtils.getConverterInstance(logger.methodParamConverter());
+            return converter.transform(args);
+        }
         Object selectParam = args[logger.paramIndex()];
         Expression expression = PARSER.parseExpression(logger.selectParam());
         selectParam = expression.getValue(selectParam);

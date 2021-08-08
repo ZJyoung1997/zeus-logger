@@ -22,7 +22,7 @@ public class ClassUtils {
     private static final Map<Class<?>, Converter<?, ?>> CONVERTER_CACHE = new ConcurrentReferenceHashMap<>();
 
     @SneakyThrows
-    public Converter<?, ?> getConverterInstance(Class<?> clazz) {
+    public Converter<?, ?> getConverterInstance(Class<? extends Converter> clazz) {
         Converter<?, ?> converter = CONVERTER_CACHE.get(clazz);
         if (converter != null) {
             return converter;
