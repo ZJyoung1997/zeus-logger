@@ -21,7 +21,6 @@ import com.lmax.disruptor.dsl.ProducerType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -80,7 +79,7 @@ public class LoggerConfiguration {
     }
 
     @Bean
-    public DefaultPointcutAdvisor zeusLoggerAdvisor() {
+    public Advisor zeusLoggerAdvisor() {
         Pointcut pointcut = new AnnotationMatchingPointcut(null, Logger.class, true);
         return new DefaultPointcutAdvisor(pointcut, loggerAroundAdvice());
     }
