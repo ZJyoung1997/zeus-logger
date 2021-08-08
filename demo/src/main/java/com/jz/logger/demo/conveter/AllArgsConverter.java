@@ -3,7 +3,7 @@ package com.jz.logger.demo.conveter;
 import com.jz.logger.core.converters.MethodParameterConverter;
 import com.jz.logger.demo.pojo.TestData;
 
-public class AllArgsConverter implements MethodParameterConverter<Object[], Object[]> {
+public class AllArgsConverter implements MethodParameterConverter<Object[]> {
     @Override
     public Object[] transform(Object[] objects) {
         TestData data = (TestData) objects[0];

@@ -1,4 +1,4 @@
 package com.jz.logger.core.converters;
 
-public interface MethodParameterConverter<T, R> extends Converter<T, R> {
+public interface MethodParameterConverter<R> extends Converter<Object[], R> {
 }
