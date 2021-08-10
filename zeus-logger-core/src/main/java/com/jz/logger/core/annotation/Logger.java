@@ -71,12 +71,12 @@ public @interface Logger {
     /**
      * 资源类型
      */
-    int resourceType() default 0;
+    int resourceType() default -1;
 
     /**
      * 操作类型
      */
-    int operationType() default 0;
+    int operationType() default -1;
 
     int paramIndex() default 0;
 
