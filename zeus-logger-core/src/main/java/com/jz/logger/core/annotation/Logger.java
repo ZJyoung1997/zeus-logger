@@ -48,7 +48,7 @@ public @interface Logger {
      * 当 {@link #methodParamConverter()} 不为默认值时，方法的入参为 #{@link #methodParamConverter()} 的结果，
      * 此时方法可以支持多个入参，但其spel表达式要支持，例如：@mapper.get(#root[0], #root[1])
      */
-    String selectMethod() default "#root";
+    String selectMethod() default "";
 
     /**
      * 自定义扩展数据，需实现 {@link LoggerExtensionData} 接口
