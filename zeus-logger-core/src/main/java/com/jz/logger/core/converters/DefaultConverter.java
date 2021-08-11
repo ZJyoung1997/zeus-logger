@@ -7,7 +7,7 @@ package com.jz.logger.core.converters;
 public class DefaultConverter implements Converter<Object, Object> {
 
     @Override
-    public Object transform(Object o) {
+    public Object transfor(Object o) {
         return o;
     }
 

@@ -45,6 +45,11 @@ public @interface Trace {
      */
     Class<? extends Converter> converter() default DefaultConverter.class;
 
+    /**
+     * 用于对 {@link TraceInfo#oldValue} 和 {@link TraceInfo#newValue} 的转化
+     */
+    String transforExpression() default "";
+
     int order() default 0;
 
 }

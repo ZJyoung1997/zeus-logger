@@ -11,6 +11,6 @@ public interface Converter<T, R> {
      * @param t   待转换对象
      * @return    转换后对象
      */
-    R transform(T t);
+    R transfor(T t);
 
 }

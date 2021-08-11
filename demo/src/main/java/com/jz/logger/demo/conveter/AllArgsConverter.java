@@ -5,7 +5,7 @@ import com.jz.logger.demo.pojo.TestData;
 
 public class AllArgsConverter implements MethodParameterConverter<Object[]> {
     @Override
-    public Object[] transform(Object[] objects) {
+    public Object[] transfor(Object[] objects) {
         TestData data = (TestData) objects[0];
         Object[] result = new Object[2];
         result[0] = data.getFamily().getId();

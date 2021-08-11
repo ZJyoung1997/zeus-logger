@@ -87,13 +87,13 @@ public class LoggerAroundAdvice implements MethodBeforeAdvice, AfterReturningAdv
     private Object getSelectParam(Logger logger, Object[] args) {
         if (DefaultMethodParameterConverter.class != logger.methodParamConverter()) {
             Converter converter = ClassUtils.getConverterInstance(logger.methodParamConverter());
-            return converter.transform(args);
+            return converter.transfor(args);
         }
         Object selectParam = args[logger.paramIndex()];
         Expression expression = PARSER.parseExpression(logger.selectParam());
         selectParam = expression.getValue(selectParam);
         Converter converter = ClassUtils.getConverterInstance(logger.paramConverter());
-        return converter.transform(selectParam);
+        return converter.transfor(selectParam);
     }
 
 }

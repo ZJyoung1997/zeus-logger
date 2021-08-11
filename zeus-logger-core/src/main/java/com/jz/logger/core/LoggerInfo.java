@@ -23,6 +23,9 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class LoggerInfo {
 
+    @Getter(AccessLevel.NONE)
+    private final ExpressionParser PARSER = new SpelExpressionParser();
+
     private Logger logger;
 
     private Object oldObject;
@@ -93,9 +96,8 @@ public class LoggerInfo {
         Object oldValue = oldObject == null ? null : field.get(oldObject);
         Object newValue= newObject == null ? null : field.get(newObject);
         if (CharSequenceUtil.isNotBlank(trace.targetValue())) {
-            ExpressionParser parser = new SpelExpressionParser();
-            oldValue = parser.parseExpression(trace.targetValue()).getValue(oldValue);
-            newValue = parser.parseExpression(trace.targetValue()).getValue(newValue);
+            oldValue = PARSER.parseExpression(trace.targetValue()).getValue(oldValue);
+            newValue = PARSER.parseExpression(trace.targetValue()).getValue(newValue);
         }
         if (isEqual(oldValue, newValue)) {
             return null;
@@ -105,14 +107,21 @@ public class LoggerInfo {
         traceInfo.setTag(trace.tag());
         traceInfo.setOrder(trace.order());
         traceInfo.setFieldName(field.getName());
-        if (converter instanceof DefaultConverter) {
-            traceInfo.setOldValue(oldValue);
-            traceInfo.setNewValue(newValue);
-        } else {
-            traceInfo.setOldValue(converter.transform(oldValue));
-            traceInfo.setNewValue(converter.transform(newValue));
-        }
+        traceInfo.setOldValue(transforValue(oldValue, trace));
+        traceInfo.setNewValue(transforValue(newValue, trace));
         return traceInfo;
+    }
+
+    private Object transforValue(Object value, Trace trace) {
+        if (CharSequenceUtil.isNotBlank(trace.transforExpression())) {
+            return PARSER.parseExpression(trace.transforExpression());
+        }
+        Converter converter = ClassUtils.getConverterInstance(trace.converter());
+        if (converter instanceof DefaultConverter) {
+            return value;
+        } else {
+            return converter.transfor(value);
+        }
     }
 
     private boolean isEqual(Object oldObject, Object newObject) {
