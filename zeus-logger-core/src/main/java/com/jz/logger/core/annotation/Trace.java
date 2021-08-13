@@ -3,8 +3,11 @@ package com.jz.logger.core.annotation;
 import com.jz.logger.core.TraceInfo;
 import com.jz.logger.core.converters.Converter;
 import com.jz.logger.core.converters.DefaultConverter;
+import com.jz.logger.core.matcher.DefaultMatcher;
+import com.jz.logger.core.matcher.Matcher;
 
 import java.lang.annotation.*;
+import java.util.Collection;
 
 /**
  * @author jz
@@ -46,9 +49,14 @@ public @interface Trace {
     Class<? extends Converter> converter() default DefaultConverter.class;
 
     /**
-     * 用于对 {@link TraceInfo#oldValue} 和 {@link TraceInfo#newValue} 的转化
+     * 若为 true 将对该字段中标注trace注解的字段进行解析
      */
-    String transforExpression() default "";
+    boolean permeate() default false;
+
+    /**
+     * 当标注在 {@link Collection} 类型的字段上，且 {@link #permeate()} 为 true 时生效，用于匹配新旧集合中元素是否为同一个
+     */
+    Class<? extends Matcher> collElementMatcher() default DefaultMatcher.class;
 
     int order() default 0;
 

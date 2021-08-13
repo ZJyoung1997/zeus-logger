@@ -3,6 +3,7 @@ package com.jz.logger.core.util;
 import com.jz.logger.core.FieldInfo;
 import com.jz.logger.core.annotation.Trace;
 import com.jz.logger.core.converters.Converter;
+import com.jz.logger.core.matcher.Matcher;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.springframework.lang.NonNull;
@@ -19,7 +20,15 @@ public class ClassUtils {
 
     private static final Map<Class<?>, List<FieldInfo>> FIELD_INFO_CACHE = new ConcurrentReferenceHashMap<>();
 
+    /**
+     * 转换器实例缓存
+     */
     private static final Map<Class<?>, Converter<?, ?>> CONVERTER_CACHE = new ConcurrentReferenceHashMap<>();
+
+    /**
+     * 匹配器实例缓存
+     */
+    private static final Map<Class<?>, Matcher<?>> MATCHER_CACHE = new ConcurrentReferenceHashMap<>();
 
     @SneakyThrows
     public Converter<?, ?> getConverterInstance(Class<? extends Converter> clazz) {
@@ -30,6 +39,17 @@ public class ClassUtils {
         converter = (Converter<?, ?>) clazz.getDeclaredConstructor().newInstance();
         CONVERTER_CACHE.put(clazz, converter);
         return converter;
+    }
+
+    @SneakyThrows
+    public Matcher<?> getMatcherInstance(Class<? extends Matcher> clazz) {
+        Matcher<?> matcher = MATCHER_CACHE.get(clazz);
+        if (matcher != null) {
+            return matcher;
+        }
+        matcher = (Matcher<?>) clazz.getDeclaredConstructor().newInstance();
+        MATCHER_CACHE.put(clazz, matcher);
+        return matcher;
     }
 
     public List<FieldInfo> getTraceFieldInfos(Class<?> clazz) {

@@ -1,30 +1,23 @@
 package com.jz.logger.core;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.collection.ListUtil;
 import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.annotation.Trace;
-import com.jz.logger.core.converters.Converter;
-import com.jz.logger.core.converters.DefaultConverter;
+import com.jz.logger.core.matcher.Matcher;
 import com.jz.logger.core.util.ClassUtils;
+import com.jz.logger.core.util.CollectionUtils;
 import com.jz.logger.core.util.LoggerUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class LoggerInfo {
-
-    @Getter(AccessLevel.NONE)
-    private final ExpressionParser PARSER = new SpelExpressionParser();
 
     private Logger logger;
 
@@ -63,83 +56,64 @@ public class LoggerInfo {
             for (int i = 0; i < length; i++) {
                 Object oldObject = oldObjectArray.length <= i ? null : oldObjectArray[i];
                 Object newObject = newObjectArray.length <= i ? null : newObjectArray[i];
-                Class<?> clazz = oldObject != null ? oldObject.getClass() :
-                        (newObject != null ? newObject.getClass() : null);
-                multipleTraceInfos.add(ClassUtils.getTraceFieldInfos(clazz).stream()
-                        .map(e -> buildTraceInfo(e, oldObject, newObject))
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList()));
+                multipleTraceInfos.add(getTraceInfos(oldObject, newObject));
             }
         } else {
-            Class<?> clazz = oldObject != null ? oldObject.getClass() : newObject.getClass();
-            if (clazz == null) {
-                multipleTraceInfos = Collections.emptyList();
-            } else {
-                multipleTraceInfos = new ArrayList<>(1);
-                multipleTraceInfos.add(ClassUtils.getTraceFieldInfos(clazz).stream()
-                        .map(e -> buildTraceInfo(e, oldObject, newObject))
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList()));
-            }
+            multipleTraceInfos = new ArrayList<>(1);
+            multipleTraceInfos.add(getTraceInfos(oldObject, newObject));
         }
         return multipleTraceInfos;
     }
 
     @SneakyThrows
-    private TraceInfo buildTraceInfo(FieldInfo fieldInfo, Object oldObject, Object newObject) {
-        Trace trace = fieldInfo.getTrace();
-        if (!LoggerUtils.isMatch(logger, trace)) {
-            return null;
+    private List<TraceInfo> getTraceInfos(Object oldObject, Object newObject) {
+        if (oldObject == null && newObject == null) {
+            return Collections.emptyList();
         }
-        Field field = fieldInfo.getField();
-        field.setAccessible(true);
-        Object oldValue = oldObject == null ? null : field.get(oldObject);
-        Object newValue= newObject == null ? null : field.get(newObject);
-        if (CharSequenceUtil.isNotBlank(trace.targetValue())) {
-            oldValue = PARSER.parseExpression(trace.targetValue()).getValue(oldValue);
-            newValue = PARSER.parseExpression(trace.targetValue()).getValue(newValue);
+        Class<?> clazz = oldObject != null ? oldObject.getClass() : newObject.getClass();
+        if (clazz == null) {
+            return Collections.emptyList();
         }
-        if (isEqual(oldValue, newValue)) {
-            return null;
-        }
-        Converter converter = ClassUtils.getConverterInstance(trace.converter());
-        TraceInfo traceInfo = new TraceInfo();
-        traceInfo.setTag(trace.tag());
-        traceInfo.setOrder(trace.order());
-        traceInfo.setFieldName(field.getName());
-        traceInfo.setOldValue(transforValue(oldValue, trace));
-        traceInfo.setNewValue(transforValue(newValue, trace));
-        return traceInfo;
-    }
-
-    private Object transforValue(Object value, Trace trace) {
-        if (CharSequenceUtil.isNotBlank(trace.transforExpression())) {
-            return PARSER.parseExpression(trace.transforExpression());
-        }
-        Converter converter = ClassUtils.getConverterInstance(trace.converter());
-        if (converter instanceof DefaultConverter) {
-            return value;
-        } else {
-            return converter.transfor(value);
-        }
-    }
-
-    private boolean isEqual(Object oldObject, Object newObject) {
-        if (oldObject == newObject) {
-            return true;
-        } else if (oldObject != null && oldObject.equals(newObject)) {
-            return true;
-        } else if (newObject != null && newObject.equals(oldObject)) {
-            return true;
-        } else if (oldObject instanceof Collection && newObject instanceof Collection) {
-            Collection oldCollection = (Collection) oldObject;
-            Collection newCollection = (Collection) newObject;
-            if (oldCollection.size() == newCollection.size() &&
-                    CollUtil.containsAll(oldCollection, newCollection)) {
-                return true;
+        List<TraceInfo> result = new ArrayList<>();
+        List<FieldInfo> fieldInfos = ClassUtils.getTraceFieldInfos(clazz);
+        for (FieldInfo fieldInfo : fieldInfos) {
+            Trace trace = fieldInfo.getTrace();
+            if (trace.permeate()) {
+                Matcher matcher = ClassUtils.getMatcherInstance(trace.collElementMatcher());
+                Field field = fieldInfo.getField();
+                field.setAccessible(true);
+                Object oldFieldValue = field.get(oldObject);
+                Object newFieldValue = field.get(newObject);
+                if (oldFieldValue instanceof Collection || newFieldValue instanceof Collection) {
+                    Collection<?> oldCollection = oldFieldValue == null ? Collections.emptyList() : ListUtil.toList((Collection<?>) oldFieldValue);
+                    Collection<?> newCollection = newFieldValue == null ? Collections.emptyList() : ListUtil.toList((Collection<?>) newFieldValue);
+                    for (Object newElement : newCollection) {
+                        Object oldElement = CollectionUtils.findFirst(oldCollection, newElement, matcher);
+                        if (oldElement == null) {
+                            // 旧集合中没找到新的，说明该元素是新增的
+                            result.add(LoggerUtils.buildTraceInfo(logger, trace, field.getName(), null, newElement));
+                        } else {
+                            result.addAll(getTraceInfos(oldElement, newElement));
+                        }
+                    }
+                    for (Object oldElement : oldCollection) {
+                        Object newElement = CollectionUtils.findFirst(newCollection, oldElement, matcher);
+                        if (newElement == null) {
+                            // 新集合中没找到旧的，说明该元素被删掉了
+                            result.add(LoggerUtils.buildTraceInfo(logger, trace, field.getName(), null, oldElement));
+                        }
+                    }
+                } else {
+                    result.addAll(getTraceInfos(oldFieldValue, newFieldValue));
+                }
+            } else {
+                TraceInfo traceInfo = LoggerUtils.buildTraceInfo(logger, fieldInfo, oldObject, newObject);
+                if (traceInfo != null) {
+                    result.add(traceInfo);
+                }
             }
         }
-        return false;
+        return result;
     }
 
 }

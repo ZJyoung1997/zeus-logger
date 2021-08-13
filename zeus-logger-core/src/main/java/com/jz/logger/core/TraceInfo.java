@@ -1,14 +1,14 @@
 package com.jz.logger.core;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import com.jz.logger.core.annotation.Logger;
-import com.jz.logger.core.annotation.Trace;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @ToString
-@Setter(AccessLevel.PACKAGE)
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@Setter
+@NoArgsConstructor
 public class TraceInfo {
 
     private String fieldName;
@@ -20,15 +20,5 @@ public class TraceInfo {
     private Object oldValue;
 
     private Object newValue;
-
-    public static TraceInfo build(Trace trace, String fieldName) {
-        TraceInfo traceInfo = new TraceInfo();
-        traceInfo.fieldName = fieldName;
-        traceInfo.order = trace.order();
-        if (CharSequenceUtil.isNotBlank(trace.tag())) {
-            traceInfo.tag = trace.tag();
-        }
-        return traceInfo;
-    }
 
 }
