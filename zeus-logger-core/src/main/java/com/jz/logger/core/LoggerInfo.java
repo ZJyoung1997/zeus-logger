@@ -1,8 +1,11 @@
 package com.jz.logger.core;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.annotation.Trace;
+import com.jz.logger.core.handler.DefaultFieldHandler;
+import com.jz.logger.core.handler.FieldHandler;
 import com.jz.logger.core.matcher.Matcher;
 import com.jz.logger.core.util.ClassUtils;
 import com.jz.logger.core.util.CollectionUtils;
@@ -78,12 +81,22 @@ public class LoggerInfo {
         List<FieldInfo> fieldInfos = ClassUtils.getTraceFieldInfos(clazz);
         for (FieldInfo fieldInfo : fieldInfos) {
             Trace trace = fieldInfo.getTrace();
-            if (trace.permeate()) {
+            if (DefaultFieldHandler.class != trace.fieldHandler()) {
+                FieldHandler fieldHandler = ClassUtils.getFieldHandlerInstance(trace.fieldHandler());
+                Field field = fieldInfo.getField();
+                field.setAccessible(true);
+                Object oldFieldValue = oldObject == null ? null : field.get(oldObject);
+                Object newFieldValue = newObject == null ? null : field.get(newObject);
+                List<TraceInfo> fieldHandlerResult = fieldHandler.toFieldInfo(logger, trace, field, oldFieldValue, newFieldValue);
+                if (CollUtil.isNotEmpty(fieldHandlerResult)) {
+                    result.addAll(fieldHandlerResult);
+                }
+            } else if (trace.permeate()) {
                 Matcher matcher = ClassUtils.getMatcherInstance(trace.collElementMatcher());
                 Field field = fieldInfo.getField();
                 field.setAccessible(true);
-                Object oldFieldValue = field.get(oldObject);
-                Object newFieldValue = field.get(newObject);
+                Object oldFieldValue = oldObject == null ? null : field.get(oldObject);
+                Object newFieldValue = newObject == null ? null : field.get(newObject);
                 if (oldFieldValue instanceof Collection || newFieldValue instanceof Collection) {
                     Collection<?> oldCollection = oldFieldValue == null ? Collections.emptyList() : ListUtil.toList((Collection<?>) oldFieldValue);
                     Collection<?> newCollection = newFieldValue == null ? Collections.emptyList() : ListUtil.toList((Collection<?>) newFieldValue);
