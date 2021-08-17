@@ -8,11 +8,14 @@ import com.jz.logger.core.converters.MethodParameterConverter;
 import com.jz.logger.core.enumerate.Strategy;
 import com.jz.logger.core.handler.DefaultLoggerTraceHandler;
 import com.jz.logger.core.handler.LoggerTraceHandler;
+import com.jz.logger.core.matcher.DefaultMatcher;
+import com.jz.logger.core.matcher.Matcher;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Collection;
 
 /**
  * @author JZ
@@ -49,6 +52,11 @@ public @interface Logger {
      * 此时方法可以支持多个入参，但其spel表达式要支持，例如：@mapper.get(#root[0], #root[1])
      */
     String selectMethod() default "";
+
+    /**
+     * 当 {@link #selectMethod()} 的返回值类型为 {@link Collection} 时，用于匹配新旧集合中元素是否为同一个
+     */
+    Class<? extends Matcher> collElementMatcher() default DefaultMatcher.class;
 
     /**
      * 自定义扩展数据，需实现 {@link LoggerExtensionData} 接口

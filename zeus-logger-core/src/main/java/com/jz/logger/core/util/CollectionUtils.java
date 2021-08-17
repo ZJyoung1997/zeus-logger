@@ -5,7 +5,6 @@ import com.jz.logger.core.matcher.Matcher;
 import lombok.experimental.UtilityClass;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * @Author JZ
@@ -18,9 +17,7 @@ public class CollectionUtils {
         if (CollUtil.isEmpty(collection)) {
             return null;
         }
-        Iterator iterator = collection.iterator();
-        while (iterator.hasNext()) {
-            Object element = iterator.next();
+        for (Object element : collection) {
             if (matcher.matches(element, target)) {
                 return element;
             }

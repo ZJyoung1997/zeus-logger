@@ -52,14 +52,21 @@ public class LoggerInfo {
         } else if (oldObject == null && newObject == null) {
             multipleTraceInfos = Collections.emptyList();
         } else if (oldObject instanceof Collection || newObject instanceof Collection) {
-            Object[] oldObjectArray = oldObject == null ? new Object[0] : ((Collection) oldObject).toArray();
-            Object[] newObjectArray = newObject == null ? new Object[0] : ((Collection) newObject).toArray();
-            int length = Math.max(oldObjectArray.length, newObjectArray.length);
-            multipleTraceInfos = new ArrayList<>(length);
-            for (int i = 0; i < length; i++) {
-                Object oldObject = oldObjectArray.length <= i ? null : oldObjectArray[i];
-                Object newObject = newObjectArray.length <= i ? null : newObjectArray[i];
-                multipleTraceInfos.add(getTraceInfos(oldObject, newObject));
+            Matcher matcher = ClassUtils.getMatcherInstance(logger.collElementMatcher());
+            Collection<?> oldCollection = oldObject == null ? Collections.emptyList() : ListUtil.toList((Collection<?>) oldObject);
+            Collection<?> newCollection = newObject == null ? Collections.emptyList() : ListUtil.toList((Collection<?>) newObject);
+            multipleTraceInfos = new ArrayList<>(Math.max(oldCollection.size(), newCollection.size()));
+            for (Object newElement : newCollection) {
+                // 旧集合中没找到新的，说明该元素为新增，若找到，则说明为编辑
+                Object oldElement = CollectionUtils.findFirst(oldCollection, newElement, matcher);
+                multipleTraceInfos.add(getTraceInfos(oldElement, newElement));
+            }
+            for (Object oldElement : oldCollection) {
+                Object newElement = CollectionUtils.findFirst(newCollection, oldElement, matcher);
+                if (newElement == null) {
+                    // 新集合中没找到旧的，说明该元素被删掉了
+                    multipleTraceInfos.add(getTraceInfos(oldElement, null));
+                }
             }
         } else {
             multipleTraceInfos = new ArrayList<>(1);
