@@ -53,7 +53,7 @@ public @interface Logger {
     /**
      * 自定义扩展数据，需实现 {@link LoggerExtensionData} 接口
      */
-    Class[] customExtData() default {};
+    Class<? extends LoggerExtensionData>[] customExtData() default {};
 
     /**
      * 禁用全局扩展数据
