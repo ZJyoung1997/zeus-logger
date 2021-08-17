@@ -93,4 +93,20 @@ public @interface Logger {
      */
     boolean enabledManual() default false;
 
+    /**
+     * 重试次数，默认-1，使用配置的默认次数 {@link LoggerProperties#defaultRetryTimes}，
+     * 若为其他负数，则代表该日志记录失败后不进行重试
+     */
+    int retryTimes() default -1;
+
+    /**
+     * 需要重试的异常
+     */
+    Class<? extends Throwable>[] retryFor() default {};
+
+    /**
+     * 不需要重试的异常
+     */
+    Class<? extends Throwable>[] noRetryFor() default {};
+
 }

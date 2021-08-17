@@ -50,7 +50,8 @@ public class LoggerConfiguration {
 
     @Bean
     public LoggerHandler loggerHandler() {
-        DefaultLoggerHandler loggerHandler = new DefaultLoggerHandler(loggerEventProvider(), loggerProperties.getDefaultStrategy());
+        DefaultLoggerHandler loggerHandler = new DefaultLoggerHandler(loggerEventProvider(),
+                loggerProperties.getDefaultStrategy(), loggerProperties.getDefaultRetryTimes());
         List<String> globalExtDataClass = loggerProperties.getGlobalExtensionDatas();
         if (CollUtil.isNotEmpty(globalExtDataClass)) {
             List<Class<?>> extensionDatas = globalExtDataClass.stream().distinct()

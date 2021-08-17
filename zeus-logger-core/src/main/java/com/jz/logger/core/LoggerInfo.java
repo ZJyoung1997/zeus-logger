@@ -10,15 +10,13 @@ import com.jz.logger.core.matcher.Matcher;
 import com.jz.logger.core.util.ClassUtils;
 import com.jz.logger.core.util.CollectionUtils;
 import com.jz.logger.core.util.LoggerUtils;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
+import lombok.*;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
 @Getter
+@ToString
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class LoggerInfo {
 

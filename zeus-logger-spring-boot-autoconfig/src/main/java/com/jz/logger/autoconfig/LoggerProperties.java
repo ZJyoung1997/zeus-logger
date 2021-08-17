@@ -21,6 +21,11 @@ public class LoggerProperties {
     private Strategy defaultStrategy = Strategy.ASYN_SERIAL;
 
     /**
+     * 默认失败重试次数，默认3，负数为不重试
+     */
+    private int defaultRetryTimes = 3;
+
+    /**
      * 日志并发处理数量
      */
     private Integer concurrentNum;

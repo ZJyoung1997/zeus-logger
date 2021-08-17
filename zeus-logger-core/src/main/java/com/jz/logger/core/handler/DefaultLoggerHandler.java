@@ -25,6 +25,8 @@ public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
 
     private List<LoggerExtensionData> globalExtDatas;
 
+    private final int defaultRetryTimes;
+
     @Setter
     private List<Class<?>> globalExtDataClass;
 
@@ -32,7 +34,8 @@ public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
 
     private Strategy strategy;
 
-    public DefaultLoggerHandler(LoggerEventProvider loggerEventProvider, Strategy strategy) {
+    public DefaultLoggerHandler(LoggerEventProvider loggerEventProvider, Strategy strategy, int defaultRetryTimes) {
+        this.defaultRetryTimes = defaultRetryTimes;
         this.loggerEventProvider = loggerEventProvider;
         if (strategy == null) {
             this.strategy = Strategy.ASYN_SERIAL;
@@ -63,12 +66,13 @@ public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
         }
         Strategy realStrategy = Strategy.DEFAULT == logger.strategy() ? this.strategy : logger.strategy();
         LoggerInfo loggerInfo = new LoggerInfo(oldObject, newObject, getExtData(oldObject, newObject, logger), logger);
+        LoggerTraceHandler retryLoggerTraceHandler = new RetryLoggerTraceHandler(defaultRetryTimes, loggerTraceHandler);
         if (Strategy.SYNC == realStrategy) {
-            loggerTraceHandler.execute(loggerInfo);
+            retryLoggerTraceHandler.execute(loggerInfo);
         } else if (Strategy.ASYN_SERIAL == realStrategy) {
-            loggerEventProvider.publishWithSerial(loggerInfo, loggerTraceHandler);
+            loggerEventProvider.publishWithSerial(loggerInfo, retryLoggerTraceHandler);
         } else if (Strategy.ASYN_CONCURRENT == realStrategy) {
-            loggerEventProvider.publishWithConcurrent(loggerInfo, loggerTraceHandler);
+            loggerEventProvider.publishWithConcurrent(loggerInfo, retryLoggerTraceHandler);
         }
     }
 
