@@ -29,7 +29,7 @@ public class LoggerInfo {
     private Map<String, Object> extDataMap;
 
     @Getter(AccessLevel.NONE)
-    private List<List<TraceInfo>> multipleTraceInfos;
+    private List<LoggerResult> loggerResults;
 
     /**
      * 日志生成时的时间戳
@@ -44,33 +44,32 @@ public class LoggerInfo {
         this.createTime = System.currentTimeMillis();
     }
 
-    public List<List<TraceInfo>> getTraceInfos() {
-        if (multipleTraceInfos != null) {
-            return multipleTraceInfos;
+    public List<LoggerResult> getLoggerResults() {
+        if (loggerResults != null) {
+            return loggerResults;
         } else if (oldObject == null && newObject == null) {
-            multipleTraceInfos = Collections.emptyList();
+            loggerResults = Collections.emptyList();
         } else if (oldObject instanceof Collection || newObject instanceof Collection) {
             Matcher matcher = ClassUtils.getMatcherInstance(logger.collElementMatcher());
             Collection<?> oldCollection = oldObject == null ? Collections.emptyList() : ListUtil.toList((Collection<?>) oldObject);
             Collection<?> newCollection = newObject == null ? Collections.emptyList() : ListUtil.toList((Collection<?>) newObject);
-            multipleTraceInfos = new ArrayList<>(Math.max(oldCollection.size(), newCollection.size()));
+            loggerResults = new ArrayList<>(Math.max(oldCollection.size(), newCollection.size()));
             for (Object newElement : newCollection) {
                 // 旧集合中没找到新的，说明该元素为新增，若找到，则说明为编辑
                 Object oldElement = CollectionUtils.findFirst(oldCollection, newElement, matcher);
-                multipleTraceInfos.add(getTraceInfos(oldElement, newElement));
+                loggerResults.add(new LoggerResult(oldElement, newElement, getTraceInfos(oldElement, newElement)));
             }
             for (Object oldElement : oldCollection) {
                 Object newElement = CollectionUtils.findFirst(newCollection, oldElement, matcher);
                 if (newElement == null) {
                     // 新集合中没找到旧的，说明该元素被删掉了
-                    multipleTraceInfos.add(getTraceInfos(oldElement, null));
+                    loggerResults.add(new LoggerResult(oldElement, null, getTraceInfos(oldElement, null)));
                 }
             }
         } else {
-            multipleTraceInfos = new ArrayList<>(1);
-            multipleTraceInfos.add(getTraceInfos(oldObject, newObject));
+            loggerResults = ListUtil.toList(new LoggerResult(oldObject, newObject, getTraceInfos(oldObject, newObject)));
         }
-        return multipleTraceInfos;
+        return loggerResults;
     }
 
     @SneakyThrows
