@@ -1,6 +1,7 @@
 package com.jz.logger.core.handler;
 
 import com.jz.logger.core.FieldInfo;
+import com.jz.logger.core.RuntimeFieldInfo;
 import com.jz.logger.core.TraceInfo;
 import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.annotation.Trace;
@@ -14,14 +15,6 @@ import java.util.List;
  */
 public interface FieldHandler<T> {
 
-    /**
-     * @param logger
-     * @param trace
-     * @param field
-     * @param oldObject  {@link Trace} 注解标注的字段的旧值
-     * @param newObject  {@link Trace} 注解标注的字段的新值
-     * @return
-     */
-    List<TraceInfo> toFieldInfo(Logger logger, Trace trace, Field field, T oldObject, T newObject);
+    List<TraceInfo> toTraceInfo(RuntimeFieldInfo fieldInfo);
 
 }

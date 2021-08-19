@@ -94,7 +94,7 @@ public @interface Logger {
     boolean enabledManual() default false;
 
     /**
-     * 重试次数，默认-1，使用配置的默认次数 {@link LoggerProperties#defaultRetryTimes}，
+     * 重试次数，默认-1，使用配置的默认次数 {@link com.jz.logger.autoconfig.LoggerProperties#defaultRetryTimes}，
      * 若为其他负数，则代表该日志记录失败后不进行重试
      */
     int retryTimes() default -1;

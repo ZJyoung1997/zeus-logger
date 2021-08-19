@@ -29,6 +29,7 @@ public class RetryLoggerTraceHandler implements LoggerTraceHandler {
 
     private void execute(LoggerInfo loggerInfo, int times) {
         try {
+            loggerInfo.destroyLoggerResults();
             loggerTraceHandler.execute(loggerInfo);
         } catch (Throwable e) {
             if (isTermination(times, loggerInfo.getLogger(), e)) {

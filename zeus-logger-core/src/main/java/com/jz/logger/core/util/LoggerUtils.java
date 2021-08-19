@@ -30,10 +30,8 @@ public class LoggerUtils {
         if (!LoggerUtils.isMatch(logger, trace)) {
             return null;
         }
-        if (CharSequenceUtil.isNotBlank(trace.targetValue())) {
-            oldObject = PARSER.parseExpression(trace.targetValue()).getValue(oldObject);
-            newObject = PARSER.parseExpression(trace.targetValue()).getValue(newObject);
-        }
+        oldObject = transforValue(oldObject, trace);
+        newObject = transforValue(newObject, trace);
         if (isEqual(oldObject, newObject)) {
             return null;
         }
@@ -56,10 +54,8 @@ public class LoggerUtils {
         field.setAccessible(true);
         Object oldValue = oldObject == null ? null : field.get(oldObject);
         Object newValue= newObject == null ? null : field.get(newObject);
-        if (CharSequenceUtil.isNotBlank(trace.targetValue())) {
-            oldValue = PARSER.parseExpression(trace.targetValue()).getValue(oldValue);
-            newValue = PARSER.parseExpression(trace.targetValue()).getValue(newValue);
-        }
+        oldValue = transforValue(oldValue, trace);
+        newValue = transforValue(newValue, trace);
         if (isEqual(oldValue, newValue)) {
             return null;
         }
@@ -67,12 +63,15 @@ public class LoggerUtils {
         traceInfo.setTag(trace.tag());
         traceInfo.setOrder(trace.order());
         traceInfo.setFieldName(field.getName());
-        traceInfo.setOldValue(transforValue(oldValue, trace));
-        traceInfo.setNewValue(transforValue(newValue, trace));
+        traceInfo.setOldValue(oldValue);
+        traceInfo.setNewValue(newValue);
         return traceInfo;
     }
 
     public Object transforValue(Object value, Trace trace) {
+        if (CharSequenceUtil.isNotBlank(trace.targetValue())) {
+            value = PARSER.parseExpression(trace.targetValue()).getValue(value);
+        }
         Converter converter = ClassUtils.getConverterInstance(trace.converter());
         if (converter instanceof DefaultConverter) {
             return value;

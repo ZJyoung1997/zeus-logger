@@ -44,6 +44,10 @@ public class LoggerInfo {
         this.createTime = System.currentTimeMillis();
     }
 
+    public void destroyLoggerResults() {
+        loggerResults = null;
+    }
+
     public List<LoggerResult> getLoggerResults() {
         if (loggerResults != null) {
             return loggerResults;
@@ -91,7 +95,7 @@ public class LoggerInfo {
                 field.setAccessible(true);
                 Object oldFieldValue = oldObject == null ? null : field.get(oldObject);
                 Object newFieldValue = newObject == null ? null : field.get(newObject);
-                List<TraceInfo> fieldHandlerResult = fieldHandler.toFieldInfo(logger, trace, field, oldFieldValue, newFieldValue);
+                List<TraceInfo> fieldHandlerResult = fieldHandler.toTraceInfo(new RuntimeFieldInfo(logger, trace, field, oldFieldValue, newFieldValue, null));
                 if (CollUtil.isNotEmpty(fieldHandlerResult)) {
                     result.addAll(fieldHandlerResult);
                 }
