@@ -4,7 +4,6 @@ import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.annotation.Trace;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.util.Assert;
 
 import java.lang.reflect.Field;
@@ -13,7 +12,6 @@ import java.lang.reflect.Field;
  * @Author JZ
  * @Date 2021/8/19 13:55
  */
-@Setter
 @Getter
 public class RuntimeFieldInfo {
 
@@ -30,6 +28,10 @@ public class RuntimeFieldInfo {
 
     @Getter(AccessLevel.NONE)
     private Object newObject;
+
+    public RuntimeFieldInfo(Logger logger, Trace trace, Field field, Object oldObject, Object newObject) {
+        this(logger, trace, field, oldObject, newObject, null);
+    }
 
     public RuntimeFieldInfo(Logger logger, Trace trace, Field field, Object oldObject, Object newObject, String prefix) {
         Assert.notNull(logger, "Logger cann not be null");

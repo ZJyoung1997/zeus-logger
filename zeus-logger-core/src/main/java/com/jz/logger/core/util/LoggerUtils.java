@@ -39,8 +39,8 @@ public class LoggerUtils {
         traceInfo.setTag(trace.tag());
         traceInfo.setOrder(trace.order());
         traceInfo.setFieldName(fieldName);
-        traceInfo.setOldValue(transforValue(oldObject, trace));
-        traceInfo.setNewValue(transforValue(newObject, trace));
+        traceInfo.setOldValue(oldObject);
+        traceInfo.setNewValue(newObject);
         return traceInfo;
     }
 
