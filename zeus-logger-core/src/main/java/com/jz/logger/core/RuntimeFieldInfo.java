@@ -17,11 +17,11 @@ import java.lang.reflect.Field;
 @Getter
 public class RuntimeFieldInfo {
 
-    private Logger logger;
+    private final Logger logger;
 
-    private Trace trace;
+    private final Trace trace;
 
-    private Field field;
+    private final Field field;
 
     private String prefix;
 
@@ -37,6 +37,7 @@ public class RuntimeFieldInfo {
         Assert.notNull(field, "Field cann not be null");
         this.logger = logger;
         this.trace = trace;
+        this.field = field;
         this.oldObject = oldObject;
         this.newObject = newObject;
         this.prefix = prefix;
