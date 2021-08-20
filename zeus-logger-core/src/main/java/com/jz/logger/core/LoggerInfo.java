@@ -121,7 +121,7 @@ public class LoggerInfo {
                         Object newElement = CollectionUtils.findFirst(newCollection, oldElement, matcher);
                         if (newElement == null) {
                             // 新集合中没找到旧的，说明该元素被删掉了
-                            result.add(LoggerUtils.buildTraceInfo(logger, trace, field.getName(), null, oldElement));
+                            result.add(LoggerUtils.buildTraceInfo(logger, trace, field.getName(), oldElement, null));
                         }
                     }
                 } else {
