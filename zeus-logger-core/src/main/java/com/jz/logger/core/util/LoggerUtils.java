@@ -11,8 +11,6 @@ import com.jz.logger.core.converters.Converter;
 import com.jz.logger.core.converters.DefaultConverter;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -23,8 +21,6 @@ import java.util.Collection;
  */
 @UtilityClass
 public class LoggerUtils {
-
-    private static final ExpressionParser PARSER = new SpelExpressionParser();
 
     public TraceInfo buildTraceInfo(Logger logger, Trace trace, String fieldName, Object oldObject, Object newObject) {
         if (!LoggerUtils.isMatch(logger, trace)) {
@@ -70,7 +66,7 @@ public class LoggerUtils {
 
     public Object transforValue(Object value, Trace trace) {
         if (CharSequenceUtil.isNotBlank(trace.targetValue())) {
-            value = PARSER.parseExpression(trace.targetValue()).getValue(value);
+            value = SpelUtils.getValue(trace.targetValue(), value);
         }
         Converter converter = ClassUtils.getConverterInstance(trace.converter());
         if (converter instanceof DefaultConverter) {
