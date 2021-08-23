@@ -14,6 +14,7 @@ import com.jz.logger.core.handler.DefaultLoggerTraceHandler;
 import com.jz.logger.core.handler.LoggerHandler;
 import com.jz.logger.core.handler.LoggerTraceHandler;
 import com.jz.logger.core.util.ClassUtils;
+import com.jz.logger.core.util.SpelUtils;
 import com.lmax.disruptor.EventFactory;
 import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -41,6 +42,11 @@ public class LoggerConfiguration {
 
     @Resource
     private LoggerProperties loggerProperties;
+
+    @Bean
+    public SpelUtils spelUtils() {
+        return new SpelUtils();
+    }
 
     @Bean
     @ConditionalOnMissingBean(name = Constants.DEFAULT_LOGGER_TRACE_HANDLER)
