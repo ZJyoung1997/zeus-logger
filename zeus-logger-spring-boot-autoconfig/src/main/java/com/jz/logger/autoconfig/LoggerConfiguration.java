@@ -1,6 +1,7 @@
 package com.jz.logger.autoconfig;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.thread.ThreadFactoryBuilder;
 import com.jz.logger.core.LoggerExtensionData;
 import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.aop.LoggerAroundAdvice;
@@ -15,8 +16,8 @@ import com.jz.logger.core.handler.LoggerHandler;
 import com.jz.logger.core.handler.LoggerTraceHandler;
 import com.jz.logger.core.util.ClassUtils;
 import com.jz.logger.core.util.SpelUtils;
+import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventFactory;
-import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,6 @@ import org.springframework.context.annotation.Configuration;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -101,8 +101,8 @@ public class LoggerConfiguration {
         Disruptor<LoggerConsumEvent> disruptor = new Disruptor<>(
                 eventFactory,
                 loggerProperties.getConcurrentRingBufferSize(),
-                Executors.defaultThreadFactory(),
-                ProducerType.SINGLE, new YieldingWaitStrategy()
+                ThreadFactoryBuilder.create().setNamePrefix("loggerConcurrent-").build(),
+                ProducerType.SINGLE, new BlockingWaitStrategy()
         );
         Integer concurrentNum = loggerProperties.getConcurrentNum();
         if (concurrentNum == null) {
@@ -121,8 +121,8 @@ public class LoggerConfiguration {
         Disruptor<LoggerConsumEvent> disruptor = new Disruptor<>(
                 eventFactory,
                 loggerProperties.getSerialRingBufferSize(),
-                Executors.defaultThreadFactory(),
-                ProducerType.SINGLE, new YieldingWaitStrategy()
+                ThreadFactoryBuilder.create().setNamePrefix("loggerSerial-").build(),
+                ProducerType.SINGLE, new BlockingWaitStrategy()
         );
         LoggerConsumEventHandler eventHandler = new LoggerConsumEventHandler();
         disruptor.handleEventsWith(eventHandler);

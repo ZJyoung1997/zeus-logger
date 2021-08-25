@@ -13,7 +13,7 @@ import java.util.List;
 @ConfigurationProperties(prefix = "zeus.logger")
 public class LoggerProperties {
 
-    private static final int DEFAULT_RING_BUFFER_SIZE = 1024;
+    private static final int DEFAULT_RING_BUFFER_SIZE = 16;
 
     /**
      * 默认处理策略，默认异步顺序执行
