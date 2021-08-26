@@ -16,8 +16,8 @@ import com.jz.logger.core.handler.LoggerHandler;
 import com.jz.logger.core.handler.LoggerTraceHandler;
 import com.jz.logger.core.util.ClassUtils;
 import com.jz.logger.core.util.SpelUtils;
-import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.EventFactory;
+import com.lmax.disruptor.SleepingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import lombok.extern.slf4j.Slf4j;
@@ -102,7 +102,7 @@ public class LoggerConfiguration {
                 eventFactory,
                 loggerProperties.getConcurrentRingBufferSize(),
                 ThreadFactoryBuilder.create().setNamePrefix("loggerConcurrent-").build(),
-                ProducerType.SINGLE, new BlockingWaitStrategy()
+                ProducerType.SINGLE, new SleepingWaitStrategy(200, 1000 * 1000 * 10)
         );
         Integer concurrentNum = loggerProperties.getConcurrentNum();
         if (concurrentNum == null) {
@@ -122,7 +122,7 @@ public class LoggerConfiguration {
                 eventFactory,
                 loggerProperties.getSerialRingBufferSize(),
                 ThreadFactoryBuilder.create().setNamePrefix("loggerSerial-").build(),
-                ProducerType.SINGLE, new BlockingWaitStrategy()
+                ProducerType.SINGLE, new SleepingWaitStrategy(200, 1000 * 1000 * 10)
         );
         LoggerConsumEventHandler eventHandler = new LoggerConsumEventHandler();
         disruptor.handleEventsWith(eventHandler);
