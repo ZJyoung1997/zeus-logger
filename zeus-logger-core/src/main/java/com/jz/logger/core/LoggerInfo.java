@@ -98,7 +98,8 @@ public class LoggerInfo {
                 if (CollUtil.isNotEmpty(fieldHandlerResult)) {
                     result.addAll(fieldHandlerResult);
                 }
-            } else if (trace.permeate()) {
+            }
+            if (trace.permeate()) {
                 Matcher matcher = ClassUtils.getMatcherInstance(trace.collElementMatcher());
                 Field field = fieldInfo.getField();
                 field.setAccessible(true);
@@ -126,7 +127,7 @@ public class LoggerInfo {
                 } else {
                     result.addAll(getTraceInfos(oldFieldValue, newFieldValue));
                 }
-            } else {
+            } else if (DefaultFieldHandler.class == trace.fieldHandler()) {
                 TraceInfo traceInfo = LoggerUtils.buildTraceInfo(logger, fieldInfo, oldObject, newObject);
                 if (traceInfo != null) {
                     result.add(traceInfo);

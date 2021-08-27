@@ -2,6 +2,7 @@ package com.jz.logger.core.handler;
 
 import com.jz.logger.core.RuntimeFieldInfo;
 import com.jz.logger.core.TraceInfo;
+import com.jz.logger.core.exceptions.NotImplementedException;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class DefaultFieldHandler implements FieldHandler<Object> {
 
     @Override
     public List<TraceInfo> toTraceInfo(RuntimeFieldInfo fieldInfo) {
-        return null;
+        throw new NotImplementedException("not implemented FieldHandler");
     }
 
 }

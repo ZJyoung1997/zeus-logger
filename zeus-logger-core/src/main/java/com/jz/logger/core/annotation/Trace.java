@@ -61,7 +61,9 @@ public @interface Trace {
     Class<? extends Matcher> collElementMatcher() default DefaultMatcher.class;
 
     /**
-     * 字段处理器，若自定义该处理器，其余属性将全部失效
+     * 字段处理器，
+     * 若自定义该处理器且 {@link #permeate()} 为 false，其余属性将全部失效；
+     * 若自定义该处理器且 {@link #permeate()} 为 true，仍会对该字段执行 {@link #permeate()} 相关逻辑
      */
     Class<? extends FieldHandler> fieldHandler() default DefaultFieldHandler.class;
 
