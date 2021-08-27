@@ -4,6 +4,7 @@ import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.annotation.Trace;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.springframework.util.Assert;
 
 import java.lang.reflect.Field;
@@ -23,16 +24,17 @@ public class RuntimeFieldInfo {
 
     private String prefix;
 
-    @Getter(AccessLevel.NONE)
     private Object oldObject;
 
-    @Getter(AccessLevel.NONE)
     private Object newObject;
 
-    public RuntimeFieldInfo(Logger logger, Trace trace, Field field, Object oldObject, Object newObject) {
-        this(logger, trace, field, oldObject, newObject, null);
-    }
+    @Getter(AccessLevel.NONE)
+    private Object oldFieldValue;
 
+    @Getter(AccessLevel.NONE)
+    private Object newFieldValue;
+
+    @SneakyThrows
     public RuntimeFieldInfo(Logger logger, Trace trace, Field field, Object oldObject, Object newObject, String prefix) {
         Assert.notNull(logger, "Logger cann not be null");
         Assert.notNull(trace, "Trace cann not be null");
@@ -43,14 +45,20 @@ public class RuntimeFieldInfo {
         this.oldObject = oldObject;
         this.newObject = newObject;
         this.prefix = prefix;
+        if (oldObject != null) {
+            oldFieldValue = field.get(oldObject);
+        }
+        if (newObject != null) {
+            newFieldValue = field.get(newObject);
+        }
     }
 
-    public <T> T getNewObject() {
-        return (T) newObject;
+    public <T> T getNewFieldValue() {
+        return (T) newFieldValue;
     }
 
-    public <T> T getOldObject() {
-        return (T) oldObject;
+    public <T> T getOldFieldValue() {
+        return (T) oldFieldValue;
     }
 
 }

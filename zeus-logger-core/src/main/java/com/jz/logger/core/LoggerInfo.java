@@ -93,9 +93,8 @@ public class LoggerInfo {
                 FieldHandler fieldHandler = ClassUtils.getFieldHandlerInstance(trace.fieldHandler());
                 Field field = fieldInfo.getField();
                 field.setAccessible(true);
-                Object oldFieldValue = oldObject == null ? null : field.get(oldObject);
-                Object newFieldValue = newObject == null ? null : field.get(newObject);
-                List<TraceInfo> fieldHandlerResult = fieldHandler.toTraceInfo(new RuntimeFieldInfo(logger, trace, field, oldFieldValue, newFieldValue, null));
+                List<TraceInfo> fieldHandlerResult = fieldHandler.toTraceInfo(
+                        new RuntimeFieldInfo(logger, trace, field, oldObject, newObject, null));
                 if (CollUtil.isNotEmpty(fieldHandlerResult)) {
                     result.addAll(fieldHandlerResult);
                 }
