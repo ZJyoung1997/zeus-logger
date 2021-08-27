@@ -22,6 +22,15 @@ import java.util.Collection;
 @UtilityClass
 public class LoggerUtils {
 
+    /**
+     *
+     * @param logger
+     * @param trace          当前处理字段上的 trace
+     * @param fieldName      当前处理字段名称
+     * @param oldObject      当前处理字段的旧值
+     * @param newObject      当前处理字段的新值
+     * @return
+     */
     public TraceInfo buildTraceInfo(Logger logger, Trace trace, String fieldName, Object oldObject, Object newObject) {
         if (!LoggerUtils.isMatch(logger, trace)) {
             return null;
@@ -40,6 +49,14 @@ public class LoggerUtils {
         return traceInfo;
     }
 
+    /**
+     *
+     * @param logger
+     * @param fieldInfo      当前处理字段的信息
+     * @param oldObject      当前处理字段所属的旧对象
+     * @param newObject      当前处理字段所属的新对象
+     * @return
+     */
     @SneakyThrows
     public TraceInfo buildTraceInfo(Logger logger, FieldInfo fieldInfo, Object oldObject, Object newObject) {
         Trace trace = fieldInfo.getTrace();
@@ -48,20 +65,9 @@ public class LoggerUtils {
         }
         Field field = fieldInfo.getField();
         field.setAccessible(true);
-        Object oldValue = oldObject == null ? null : field.get(oldObject);
-        Object newValue= newObject == null ? null : field.get(newObject);
-        oldValue = transforValue(oldValue, trace);
-        newValue = transforValue(newValue, trace);
-        if (isEqual(oldValue, newValue)) {
-            return null;
-        }
-        TraceInfo traceInfo = new TraceInfo();
-        traceInfo.setTag(trace.tag());
-        traceInfo.setOrder(trace.order());
-        traceInfo.setFieldName(field.getName());
-        traceInfo.setOldValue(oldValue);
-        traceInfo.setNewValue(newValue);
-        return traceInfo;
+        Object oldFieldValue = oldObject == null ? null : field.get(oldObject);
+        Object newFieldValue= newObject == null ? null : field.get(newObject);
+        return buildTraceInfo(logger, fieldInfo.getTrace(), field.getName(), oldFieldValue, newFieldValue);
     }
 
     public Object transforValue(Object value, Trace trace) {

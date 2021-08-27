@@ -1,14 +1,12 @@
 package com.jz.logger.core;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Getter
 @ToString
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class TraceInfo {
 
     private String fieldName;
