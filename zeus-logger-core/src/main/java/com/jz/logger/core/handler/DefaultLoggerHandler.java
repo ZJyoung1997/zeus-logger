@@ -42,6 +42,9 @@ public class DefaultLoggerHandler implements BeanFactoryAware, LoggerHandler {
         } else {
             this.strategy = strategy;
         }
+        if (!loggerEventProvider.supportStrategy(this.strategy)) {
+            throw new IllegalArgumentException(this.strategy + " strategy is not turned on");
+        }
     }
 
     @Override

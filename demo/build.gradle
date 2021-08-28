@@ -6,7 +6,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.jz:zeus-logger-spring-boot-starter:1.0.1-SNAPSHOT'
+    implementation 'com.jz:zeus-logger-spring-boot-starter:2021.8.28-SNAPSHOT'
 //    implementation project(':zeus-logger-spring-boot-starter')
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'

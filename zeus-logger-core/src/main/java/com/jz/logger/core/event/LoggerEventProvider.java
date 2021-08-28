@@ -1,6 +1,7 @@
 package com.jz.logger.core.event;
 
 import com.jz.logger.core.LoggerInfo;
+import com.jz.logger.core.enumerate.Strategy;
 import com.jz.logger.core.handler.LoggerTraceHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -20,17 +21,24 @@ public class LoggerEventProvider {
     public LoggerEventProvider(Disruptor<LoggerConsumEvent> serialDisruptor, Disruptor<LoggerConsumEvent> concurrentDisruptor) {
         this.serialDisruptor = serialDisruptor;
         this.concurrentDisruptor = concurrentDisruptor;
-        this.serialRingBuffer = serialDisruptor.getRingBuffer();
-        this.concurrentRingBuffer = concurrentDisruptor.getRingBuffer();
+        this.serialRingBuffer = serialDisruptor == null ? null : serialDisruptor.getRingBuffer();
+        this.concurrentRingBuffer = concurrentDisruptor == null ? null : concurrentDisruptor.getRingBuffer();
     }
 
     @PostConstruct
     private void init() {
-        serialDisruptor.start();
-        concurrentDisruptor.start();
+        if (serialDisruptor != null) {
+            serialDisruptor.start();
+        }
+        if (concurrentDisruptor != null) {
+            concurrentDisruptor.start();
+        }
     }
 
     public void publishWithSerial(LoggerInfo loggerInfo, LoggerTraceHandler loggerTraceHandler) {
+        if (serialRingBuffer == null) {
+            throw new IllegalStateException(Strategy.ASYN_SERIAL + " strategy is not turned on");
+        }
         long sequence = serialRingBuffer.next();
         try {
             LoggerConsumEvent loggerConsumEvent = serialRingBuffer.get(sequence);
@@ -42,6 +50,9 @@ public class LoggerEventProvider {
     }
 
     public void publishWithConcurrent(LoggerInfo loggerInfo, LoggerTraceHandler loggerTraceHandler) {
+        if (concurrentRingBuffer == null) {
+            throw new IllegalStateException(Strategy.ASYN_CONCURRENT + " strategy is not turned on");
+        }
         long sequence = concurrentRingBuffer.next();
         try {
             LoggerConsumEvent loggerConsumEvent = concurrentRingBuffer.get(sequence);
@@ -49,6 +60,16 @@ public class LoggerEventProvider {
             loggerConsumEvent.setLoggerTraceHandler(loggerTraceHandler);
         } finally {
             concurrentRingBuffer.publish(sequence);
+        }
+    }
+
+    public boolean supportStrategy(Strategy strategy) {
+        if (Strategy.ASYN_SERIAL == strategy) {
+            return serialDisruptor != null;
+        } else if (Strategy.ASYN_CONCURRENT == strategy) {
+            return concurrentDisruptor != null;
+        } else {
+            return false;
         }
     }
 

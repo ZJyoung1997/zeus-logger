@@ -2,6 +2,9 @@ package com.jz.logger.autoconfig;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.thread.ThreadFactoryBuilder;
+import com.jz.logger.autoconfig.LoggerProperties.BaseDisruptorConfig;
+import com.jz.logger.autoconfig.LoggerProperties.ConcurrentConfig;
+import com.jz.logger.autoconfig.LoggerProperties.SerialConfig;
 import com.jz.logger.core.LoggerExtensionData;
 import com.jz.logger.core.annotation.Logger;
 import com.jz.logger.core.aop.LoggerAroundAdvice;
@@ -16,8 +19,8 @@ import com.jz.logger.core.handler.LoggerHandler;
 import com.jz.logger.core.handler.LoggerTraceHandler;
 import com.jz.logger.core.util.ClassUtils;
 import com.jz.logger.core.util.SpelUtils;
-import com.lmax.disruptor.EventFactory;
-import com.lmax.disruptor.SleepingWaitStrategy;
+import com.lmax.disruptor.WaitStrategy;
+import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import lombok.extern.slf4j.Slf4j;
@@ -97,19 +100,20 @@ public class LoggerConfiguration {
     }
 
     private Disruptor<LoggerConsumEvent> concurrentDisruptor() {
+        ConcurrentConfig concurrentConfig = loggerProperties.getDisruptor().getConcurrent();
+        if (!concurrentConfig.isEnabled()) {
+            return null;
+        }
         EventFactory<LoggerConsumEvent> eventFactory = new LoggerEeventFactory();
         Disruptor<LoggerConsumEvent> disruptor = new Disruptor<>(
                 eventFactory,
-                loggerProperties.getConcurrentRingBufferSize(),
-                ThreadFactoryBuilder.create().setNamePrefix("loggerConcurrent-").build(),
-                ProducerType.SINGLE, new SleepingWaitStrategy(200, 1000 * 1000 * 10)
+                concurrentConfig.getRingBufferSize(),
+                ThreadFactoryBuilder.create().setNamePrefix(concurrentConfig.getThreadNamePrefix()).build(),
+                ProducerType.SINGLE, getWaitStrategy(concurrentConfig)
         );
-        Integer concurrentNum = loggerProperties.getConcurrentNum();
-        if (concurrentNum == null) {
-            concurrentNum = Runtime.getRuntime().availableProcessors();
-        }
-        LoggerConsumEventHandler[] eventHandlers = new LoggerConsumEventHandler[concurrentNum];
-        for (int i = 0; i < concurrentNum; i++) {
+        int concurrentCustomerNum = concurrentConfig.getConcurrentCustomerNum();
+        LoggerConsumEventHandler[] eventHandlers = new LoggerConsumEventHandler[concurrentCustomerNum];
+        for (int i = 0; i < concurrentCustomerNum; i++) {
             eventHandlers[i] = new LoggerConsumEventHandler();
         }
         disruptor.handleEventsWithWorkerPool(eventHandlers);
@@ -117,16 +121,29 @@ public class LoggerConfiguration {
     }
 
     private Disruptor<LoggerConsumEvent> serialDisruptor() {
+        SerialConfig serialConfig = loggerProperties.getDisruptor().getSerial();
+        if (!serialConfig.isEnabled()) {
+            return null;
+        }
         EventFactory<LoggerConsumEvent> eventFactory = new LoggerEeventFactory();
         Disruptor<LoggerConsumEvent> disruptor = new Disruptor<>(
                 eventFactory,
-                loggerProperties.getSerialRingBufferSize(),
-                ThreadFactoryBuilder.create().setNamePrefix("loggerSerial-").build(),
-                ProducerType.SINGLE, new SleepingWaitStrategy(200, 1000 * 1000 * 10)
+                serialConfig.getRingBufferSize(),
+                ThreadFactoryBuilder.create().setNamePrefix(serialConfig.getThreadNamePrefix()).build(),
+                ProducerType.SINGLE, getWaitStrategy(serialConfig)
         );
         LoggerConsumEventHandler eventHandler = new LoggerConsumEventHandler();
         disruptor.handleEventsWith(eventHandler);
         return disruptor;
+    }
+
+    private WaitStrategy getWaitStrategy(BaseDisruptorConfig config) {
+        switch (config.getWaitStrategy()) {
+            case BLOCKING: return new BlockingWaitStrategy();
+            case YIELDING: return new YieldingWaitStrategy();
+            case SLEEPING:
+            default: return new SleepingWaitStrategy(config.getSleepingWaitStrategyRetries(), config.getSleepingWaitStrategySleepTime());
+        }
     }
 
 }

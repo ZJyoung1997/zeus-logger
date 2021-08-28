@@ -1,6 +1,15 @@
 zeus:
   logger:
-    concurrentNum: 4
-    concurrentRingBufferSize: 1024
-    serialRingBufferSize: 1024
+    default-retry-times: 3
+    default-strategy: asyn_serial
     globalExtensionDatas: com.jz.logger.demo.CustomExtensionDatas
+    disruptor:
+      concurrent:
+        enabled: false
+        ring-buffer-size: 16
+        concurrent-customer-num: 4
+        thread-name-prefix: logger-customize1-
+      serial:
+        enabled: true
+        ring-buffer-size: 16
+        thread-name-prefix: logger-customize2-
