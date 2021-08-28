@@ -14,13 +14,14 @@ ext {
 group 'com.jz'
 version "$projectVersion"
 
-subprojects {
+allprojects {
     group 'com.jz'
     version "$projectVersion"
 
     apply plugin: 'idea'
     apply plugin: 'java'
     apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
 
@@ -46,6 +47,31 @@ subprojects {
         compileOnly "org.projectlombok:lombok:${lombokVersion}"
         annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    }
+
+    java {
+        withSourcesJar()
+    }
+
+    if (!project.name.equals('demo')) {
+        publishing {
+            publications {
+                maven(MavenPublication) {
+                    from components.java
+                    versionMapping {
+                        usage('java-api') {
+                            fromResolutionOf('runtimeClasspath')
+                        }
+                        usage('java-runtime') {
+                            fromResolutionResult()
+                        }
+                    }
+                }
+            }
+//            repositories {
+//                mavenLocal()
+//            }
+        }
     }
 
 }

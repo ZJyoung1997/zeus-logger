@@ -1,7 +1,13 @@
 description = 'demo'
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
 dependencies {
-    implementation project(':zeus-logger-spring-boot-starter')
+    implementation 'com.jz:zeus-logger-spring-boot-starter:1.0.1-SNAPSHOT'
+//    implementation project(':zeus-logger-spring-boot-starter')
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 }
