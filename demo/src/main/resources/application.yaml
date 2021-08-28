@@ -5,7 +5,7 @@ zeus:
     globalExtensionDatas: com.jz.logger.demo.CustomExtensionDatas
     disruptor:
       concurrent:
-        enabled: false
+        enabled: true
         ring-buffer-size: 16
         concurrent-customer-num: 4
         thread-name-prefix: logger-customize1-
