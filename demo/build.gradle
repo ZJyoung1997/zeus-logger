@@ -1,0 +1,11 @@
+description = 'demo'
+
+dependencies {
+    implementation project(':zeus-logger-spring-boot-starter')
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+}
+
+bootJar {
+    enabled true
+}

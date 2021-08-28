@@ -1,0 +1,8 @@
+description = 'zeus-logger-core'
+
+dependencies {
+    api 'com.lmax:disruptor'
+    api 'cn.hutool:hutool-core'
+    api 'org.projectlombok:lombok'
+    api 'org.springframework.boot:spring-boot-starter-aop'
+}

@@ -1,0 +1,6 @@
+description = 'zeus-logger-spring-boot-autoconfig'
+
+dependencies {
+    api project(':zeus-logger-core')
+    implementation 'org.springframework.boot:spring-boot-configuration-processor'
+}

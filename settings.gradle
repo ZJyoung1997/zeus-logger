@@ -1,0 +1,5 @@
+rootProject.name = 'zeus-logger'
+include(':zeus-logger-spring-boot-starter')
+include(':demo')
+include(':zeus-logger-core')
+include(':zeus-logger-spring-boot-autoconfig')

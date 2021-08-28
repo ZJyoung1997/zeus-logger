@@ -1,0 +1,5 @@
+description = 'zeus-logger-spring-boot-starter'
+
+dependencies {
+    api project(':zeus-logger-spring-boot-autoconfig')
+}

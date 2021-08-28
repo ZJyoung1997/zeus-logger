@@ -1,0 +1,51 @@
+plugins {
+    id 'org.springframework.boot' version '2.5.2'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+}
+
+ext {
+    projectVersion = '1.0.1-SNAPSHOT'
+    springBootVersion = '2.5.2'
+    disruptorVersion = '3.4.4'
+    hutoolVersion = '5.7.3'
+    lombokVersion = '1.18.20'
+}
+
+group 'com.jz'
+version "$projectVersion"
+
+subprojects {
+    group 'com.jz'
+    version "$projectVersion"
+
+    apply plugin: 'idea'
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    bootJar {
+        enabled = false
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+        }
+        dependencies {
+            dependency "com.lmax:disruptor:${disruptorVersion}"
+            dependency "cn.hutool:hutool-core:${hutoolVersion}"
+        }
+    }
+
+    dependencies {
+        compileOnly "org.projectlombok:lombok:${lombokVersion}"
+        annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    }
+
+}
