@@ -8,8 +8,7 @@ import com.jz.logger.demo.pojo.TestData;
 public interface BaseController extends BaseInterface {
 
     @Logger(selectParam = "family?.id", selectMethod = "@mapper.get(#root[0])",
-            topic = "更新房主和朋友圈", methodParamConverter = AllArgsConverter.class,
-            strategy = Strategy.ASYN_CONCURRENT)
+            topic = "更新房主和朋友圈", methodParamConverter = AllArgsConverter.class)
     Object update(TestData data);
 
 }

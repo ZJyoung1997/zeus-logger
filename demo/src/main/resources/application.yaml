@@ -5,11 +5,12 @@ zeus:
     globalExtensionDatas: com.jz.logger.demo.CustomExtensionDatas
     disruptor:
       concurrent:
-        enabled: true
+        enabled: false
         ring-buffer-size: 16
         concurrent-customer-num: 4
         thread-name-prefix: logger-customize1-
       serial:
         enabled: true
         ring-buffer-size: 16
+        wait-strategy: blocking
         thread-name-prefix: logger-customize2-
