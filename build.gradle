@@ -11,9 +11,6 @@ ext {
     lombokVersion = '1.18.20'
 }
 
-group 'com.jz'
-version "$projectVersion"
-
 allprojects {
     group 'com.jz'
     version "$projectVersion"
