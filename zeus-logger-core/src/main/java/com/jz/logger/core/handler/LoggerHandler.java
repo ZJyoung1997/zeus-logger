@@ -8,6 +8,6 @@ import com.jz.logger.core.annotation.Logger;
  */
 public interface LoggerHandler {
 
-    void handleLogger(Object oldObject, Object newObject, Logger logger);
+    void handleLogger(Object oldObject, Object newObject, Object[] args, Logger logger);
 
 }

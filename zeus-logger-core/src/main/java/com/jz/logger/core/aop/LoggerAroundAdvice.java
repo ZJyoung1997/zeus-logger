@@ -62,7 +62,7 @@ public class LoggerAroundAdvice implements MethodBeforeAdvice, AfterReturningAdv
         } else {
             newObject.set(SpelUtils.getValue(logger.selectMethod(), selectParam.get()));
         }
-        loggerHandler.handleLogger(oldObject.get(), newObject.get(), logger);
+        loggerHandler.handleLogger(oldObject.get(), newObject.get(), args, logger);
     }
 
     private Object getSelectParam(Logger logger, Object[] args) {

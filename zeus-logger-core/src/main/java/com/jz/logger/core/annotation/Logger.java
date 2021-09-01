@@ -64,6 +64,20 @@ public @interface Logger {
     Class<? extends LoggerExtensionData>[] customExtData() default {};
 
     /**
+     * <p>
+     * 获取扩展数据的spel表达式，
+     * 格式 "precondition;key;spel"，其中
+     * precondition 为该扩展数据生效的前提条件，其值为psel表达式，当precondition结果为true时才会获取扩展数据，该部分可省略
+     * key 作为获取扩展数据时的key
+     * spel作为真正获取数据的spel表达式
+     * 例如 "true;userId;@userDao.findById(#root[0])"、"userId;@userDao.findById(#root[0])"
+     * #root 表示 @Logger 注解所标注方法的入参数组
+     * </p>
+     * @return
+     */
+    String[] extData() default {};
+
+    /**
      * 禁用全局扩展数据
      */
     boolean disableGlobalExtData() default false;
