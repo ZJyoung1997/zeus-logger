@@ -26,6 +26,14 @@ allprojects {
         enabled = false
     }
 
+    jar {
+        archiveClassifier = ''
+    }
+
+    java {
+        withSourcesJar()
+    }
+
     repositories {
         mavenCentral()
     }
@@ -44,10 +52,6 @@ allprojects {
         compileOnly "org.projectlombok:lombok:${lombokVersion}"
         annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    }
-
-    java {
-        withSourcesJar()
     }
 
     if (!project.name.equals('demo')) {
