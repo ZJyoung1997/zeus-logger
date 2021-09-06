@@ -96,6 +96,15 @@ public @interface Logger {
     int resourceType() default -1;
 
     /**
+     * 动态资源类型
+     * 该属性值为 spel 表达式, 例如："#root.name == '123' ? 1 : 2",
+     * 其中 #root 表示 {@link #selectMethod()} 的结果
+     * 该属性优先级高于 {@link #resourceType()}
+     * @return  返回值类型应为 int 同 {@link #resourceType()}
+     */
+    String dynamicResourceType() default "";
+
+    /**
      * 操作类型
      */
     int operationType() default -1;

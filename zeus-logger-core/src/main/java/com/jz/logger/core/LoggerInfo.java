@@ -58,26 +58,33 @@ public class LoggerInfo {
             Collection<?> oldCollection = oldObject == null ? Collections.emptyList() : ListUtil.toList((Collection<?>) oldObject);
             Collection<?> newCollection = newObject == null ? Collections.emptyList() : ListUtil.toList((Collection<?>) newObject);
             loggerResults = new ArrayList<>(Math.max(oldCollection.size(), newCollection.size()));
+            int resourceType;
             for (Object newElement : newCollection) {
                 // 旧集合中没找到新的，说明该元素为新增，若找到，则说明为编辑
                 Object oldElement = CollectionUtils.findFirst(oldCollection, newElement, matcher);
-                loggerResults.add(new LoggerResult(oldElement, newElement, getTraceInfos(oldElement, newElement)));
+                resourceType = LoggerUtils.getResourceType(oldElement, newElement, logger.resourceType(), logger.dynamicResourceType());
+                loggerResults.add(new LoggerResult(oldElement, newElement, resourceType,
+                        getTraceInfos(oldElement, newElement, resourceType)));
             }
             for (Object oldElement : oldCollection) {
                 Object newElement = CollectionUtils.findFirst(newCollection, oldElement, matcher);
                 if (newElement == null) {
                     // 新集合中没找到旧的，说明该元素被删掉了
-                    loggerResults.add(new LoggerResult(oldElement, null, getTraceInfos(oldElement, null)));
+                    resourceType = LoggerUtils.getResourceType(oldElement, null, logger.resourceType(), logger.dynamicResourceType());
+                    loggerResults.add(new LoggerResult(oldElement, null, resourceType,
+                            getTraceInfos(oldElement, null, resourceType)));
                 }
             }
         } else {
-            loggerResults = ListUtil.toList(new LoggerResult(oldObject, newObject, getTraceInfos(oldObject, newObject)));
+            int resourceType = LoggerUtils.getResourceType(oldObject, newObject, logger.resourceType(), logger.dynamicResourceType());
+            loggerResults = ListUtil.toList(new LoggerResult(oldObject, newObject, resourceType,
+                    getTraceInfos(oldObject, newObject, resourceType)));
         }
         return loggerResults;
     }
 
     @SneakyThrows
-    private List<TraceInfo> getTraceInfos(Object oldObject, Object newObject) {
+    private List<TraceInfo> getTraceInfos(Object oldObject, Object newObject, int resourceType) {
         if (oldObject == null && newObject == null) {
             return Collections.emptyList();
         }
@@ -112,23 +119,23 @@ public class LoggerInfo {
                         Object oldElement = CollectionUtils.findFirst(oldCollection, newElement, matcher);
                         if (oldElement == null) {
                             // 旧集合中没找到新的，说明该元素是新增的
-                            result.add(LoggerUtils.buildTraceInfo(logger, trace, field.getName(), null, newElement));
+                            result.add(LoggerUtils.buildTraceInfo(resourceType, logger, trace, field.getName(), null, newElement));
                         } else {
-                            result.addAll(getTraceInfos(oldElement, newElement));
+                            result.addAll(getTraceInfos(oldElement, newElement, resourceType));
                         }
                     }
                     for (Object oldElement : oldCollection) {
                         Object newElement = CollectionUtils.findFirst(newCollection, oldElement, matcher);
                         if (newElement == null) {
                             // 新集合中没找到旧的，说明该元素被删掉了
-                            result.add(LoggerUtils.buildTraceInfo(logger, trace, field.getName(), oldElement, null));
+                            result.add(LoggerUtils.buildTraceInfo(resourceType, logger, trace, field.getName(), oldElement, null));
                         }
                     }
                 } else {
-                    result.addAll(getTraceInfos(oldFieldValue, newFieldValue));
+                    result.addAll(getTraceInfos(oldFieldValue, newFieldValue, resourceType));
                 }
             } else if (DefaultFieldHandler.class == trace.fieldHandler()) {
-                TraceInfo traceInfo = LoggerUtils.buildTraceInfo(logger, fieldInfo, oldObject, newObject);
+                TraceInfo traceInfo = LoggerUtils.buildTraceInfo(resourceType, logger, fieldInfo, oldObject, newObject);
                 if (traceInfo != null) {
                     result.add(traceInfo);
                 }

@@ -31,8 +31,8 @@ public class LoggerUtils {
      * @param newObject      当前处理字段的新值
      * @return
      */
-    public TraceInfo buildTraceInfo(Logger logger, Trace trace, String fieldName, Object oldObject, Object newObject) {
-        if (!LoggerUtils.isMatch(logger, trace)) {
+    public TraceInfo buildTraceInfo(int resourceType, Logger logger, Trace trace, String fieldName, Object oldObject, Object newObject) {
+        if (!LoggerUtils.isMatch(resourceType, logger.operationType(), logger.topic(), trace)) {
             return null;
         }
         oldObject = transforValue(oldObject, trace);
@@ -58,16 +58,16 @@ public class LoggerUtils {
      * @return
      */
     @SneakyThrows
-    public TraceInfo buildTraceInfo(Logger logger, FieldInfo fieldInfo, Object oldObject, Object newObject) {
+    public TraceInfo buildTraceInfo(int resourceType, Logger logger, FieldInfo fieldInfo, Object oldObject, Object newObject) {
         Trace trace = fieldInfo.getTrace();
-        if (!LoggerUtils.isMatch(logger, trace)) {
+        if (!LoggerUtils.isMatch(resourceType, logger.operationType(), logger.topic(), trace)) {
             return null;
         }
         Field field = fieldInfo.getField();
         field.setAccessible(true);
         Object oldFieldValue = oldObject == null ? null : field.get(oldObject);
         Object newFieldValue= newObject == null ? null : field.get(newObject);
-        return buildTraceInfo(logger, fieldInfo.getTrace(), field.getName(), oldFieldValue, newFieldValue);
+        return buildTraceInfo(resourceType, logger, fieldInfo.getTrace(), field.getName(), oldFieldValue, newFieldValue);
     }
 
     public Object transforValue(Object value, Trace trace) {
@@ -100,17 +100,28 @@ public class LoggerUtils {
         return false;
     }
 
-    public boolean isMatch(Logger logger, Trace trace) {
-        if (trace.topic().length > 0 && !ArrayUtil.contains(trace.topic(), logger.topic())) {
+    public boolean isMatch(int resourceType, int operationType, String topic,Trace trace) {
+        if (trace.topic().length > 0 && !ArrayUtil.contains(trace.topic(), topic)) {
             return false;
         }
-        if (trace.resourceType().length > 0 && !ArrayUtil.contains(trace.resourceType(), logger.resourceType())) {
+        if (trace.resourceType().length > 0 && !ArrayUtil.contains(trace.resourceType(), resourceType)) {
             return false;
         }
-        if (trace.operationType().length > 0 && !ArrayUtil.contains(trace.operationType(), logger.operationType())) {
+        if (trace.operationType().length > 0 && !ArrayUtil.contains(trace.operationType(), operationType)) {
             return false;
         }
         return true;
+    }
+
+    public static int getResourceType(Object o1, Object o2, int resourceType, String spel) {
+        if (CharSequenceUtil.isBlank(spel)) {
+            return resourceType;
+        }
+        Object effectiveObj = o1 != null ? o1 : o2;
+        if (effectiveObj != null) {
+            return (int) SpelUtils.getValue(spel, effectiveObj);
+        }
+        return resourceType;
     }
 
 }
