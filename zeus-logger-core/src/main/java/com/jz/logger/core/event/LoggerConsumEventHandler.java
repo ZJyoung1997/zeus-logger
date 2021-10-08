@@ -19,6 +19,8 @@ public class LoggerConsumEventHandler implements EventHandler<LoggerConsumEvent>
                     .execute(loggerConsumEvent.getLoggerInfo());
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            loggerConsumEvent.clear();
         }
     }
 

@@ -13,4 +13,9 @@ public class LoggerConsumEvent {
 
     private LoggerTraceHandler loggerTraceHandler;
 
+    public void clear() {
+        this.loggerInfo = null;
+        this.loggerTraceHandler = null;
+    }
+
 }
