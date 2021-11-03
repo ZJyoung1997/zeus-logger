@@ -4,7 +4,7 @@ plugins {
 }
 
 ext {
-    projectVersion = '2021.8.28-SNAPSHOT'
+    projectVersion = '2021.11.3-SNAPSHOT'
     springBootVersion = '2.5.2'
     disruptorVersion = '3.4.4'
     hutoolVersion = '5.7.3'
